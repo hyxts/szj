@@ -51,7 +51,6 @@
             -moz-osx-font-smoothing: grayscale;
         }
 
-        /* ========== Toast 通知 ========== */
         .toast-container {
             position: fixed;
             top: 80px;
@@ -107,7 +106,6 @@
             }
         }
 
-        /* ========== 顶部导航 ========== */
         header {
             background: var(--card);
             border-bottom: 1px solid var(--border);
@@ -220,7 +218,6 @@
             }
         }
 
-        /* ========== 主内容区 ========== */
         main {
             max-width: 1200px;
             margin: 0 auto;
@@ -244,7 +241,6 @@
             }
         }
 
-        /* ========== 卡片 ========== */
         .card {
             background: var(--card);
             border-radius: var(--radius);
@@ -274,7 +270,6 @@
             border-radius: 2px;
         }
 
-        /* ========== 统计卡片 ========== */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -308,7 +303,6 @@
             font-weight: 500;
         }
 
-        /* ========== 图表 ========== */
         .chart-container {
             position: relative;
             height: 300px;
@@ -320,7 +314,6 @@
             gap: 1.25rem;
         }
 
-        /* ========== 表格 ========== */
         .table-wrapper {
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
@@ -369,7 +362,6 @@
             border-bottom: none;
         }
 
-        /* ========== 按钮 ========== */
         .btn {
             padding: 0.6rem 1.2rem;
             border: none;
@@ -421,7 +413,6 @@
             gap: 0.4rem;
         }
 
-        /* ========== 表单 ========== */
         .form-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -460,7 +451,6 @@
             border-color: #CBD5E1;
         }
 
-        /* ========== 弹窗 ========== */
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -539,7 +529,6 @@
             color: var(--text-primary);
         }
 
-        /* ========== 操作栏 ========== */
         .action-bar {
             display: flex;
             justify-content: space-between;
@@ -554,7 +543,6 @@
             color: var(--text-primary);
         }
 
-        /* ========== 空状态 ========== */
         .empty-state {
             text-align: center;
             padding: 3rem 1.5rem;
@@ -574,7 +562,6 @@
             color: var(--text-muted);
         }
 
-        /* ========== 响应式 ========== */
         @media (max-width: 768px) {
             .nav-container {
                 padding: 0 0.75rem;
@@ -681,10 +668,8 @@
 </head>
 <body>
 
-    <!-- Toast 通知容器 -->
     <div class="toast-container" id="toastContainer"></div>
 
-    <!-- 顶部导航 -->
     <header>
         <div class="nav-container">
             <div class="logo">
@@ -702,9 +687,7 @@
         </div>
     </header>
 
-    <!-- 主内容区 -->
     <main>
-        <!-- Dashboard 页面 -->
         <div class="page active" id="dashboard">
             <div class="stats-grid">
                 <div class="stat-card">
@@ -757,7 +740,6 @@
             </div>
         </div>
 
-        <!-- 成绩管理页面 -->
         <div class="page" id="grades">
             <div class="action-bar">
                 <h2>📋 成绩管理</h2>
@@ -795,7 +777,6 @@
             </div>
         </div>
 
-        <!-- 统计分析页面 -->
         <div class="page" id="stats">
             <h2 style="margin-bottom:1.25rem;font-weight:700;">📊 统计分析</h2>
             <div class="charts-grid">
@@ -833,7 +814,6 @@
         </div>
     </main>
 
-    <!-- 添加/编辑弹窗 -->
     <div class="modal-overlay" id="modal">
         <div class="modal">
             <div class="modal-header">
@@ -910,7 +890,6 @@
 
     <script>
         (function() {
-            // ==================== 配置 ====================
             const SUPABASE_CONFIG = {
                 url: 'https://ogfzjjlzxpxosnyxjxci.supabase.co',
                 key: 'sb_publishable_WvalsHmw093vcsHkKMIU5w_0ozf0XOE'
@@ -942,14 +921,12 @@
                 geography: 100
             };
 
-            // ==================== 状态 ====================
             let exams = [];
             let charts = {};
             let syncTimeout = null;
             let hasUnsavedChanges = false;
             let isSyncing = false;
 
-            // ==================== Toast 通知 ====================
             function showToast(message, type = 'info') {
                 const container = document.getElementById('toastContainer');
                 const toast = document.createElement('div');
@@ -962,13 +939,11 @@
                         toast.remove();
                     }
                 });
-                // 兜底清理
                 setTimeout(() => {
                     if (toast.parentNode) toast.remove();
                 }, 3200);
             }
 
-            // ==================== 同步状态 ====================
             function updateSyncStatus(status, text) {
                 const dot = document.getElementById('syncDot');
                 const statusText = document.getElementById('syncText');
@@ -977,7 +952,6 @@
                 if (status === 'syncing') dot.classList.add('syncing');
                 if (status === 'error') dot.classList.add('error');
                 statusText.textContent = text;
-                // 更新手动同步提示
                 const syncEl = document.getElementById('syncStatus');
                 if (status === 'error') {
                     syncEl.title = '同步失败，点击重试';
@@ -988,7 +962,6 @@
                 }
             }
 
-            // ==================== 数据持久化 ====================
             function saveToLocal() {
                 localStorage.setItem('gradeData', JSON.stringify({
                     exams: exams,
@@ -1013,7 +986,6 @@
                 return null;
             }
 
-            // ==================== Supabase 同步 ====================
             async function apiRequest(path, options = {}) {
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 12000);
@@ -1044,12 +1016,11 @@
                     if (data && data.length > 0 && Array.isArray(data[0].exams)) {
                         const cloudUpdatedAt = data[0].updatedAt ? new Date(data[0].updatedAt).getTime() : 0;
                         const localUpdatedAt = loadFromLocal() ? new Date(loadFromLocal()).getTime() : 0;
-                        // 如果云端数据更新，则覆盖本地
                         if (cloudUpdatedAt > localUpdatedAt) {
                             exams = data[0].exams;
                             saveToLocal();
                             hasUnsavedChanges = false;
-                            return true; // 表示数据有更新
+                            return true;
                         }
                     }
                     return false;
@@ -1064,10 +1035,12 @@
                     const payload = {
                         id: 'grade_data_single',
                         exams: exams,
-                        updatedAt: new Date().toISOString()
+                        "updatedAt": new Date().toISOString()
                     };
-                    // 先检查记录是否存在
-                    const checkResp = await apiRequest('/rest/v1/grade_data?id=eq.grade_data_single');
+
+                    const checkResp = await apiRequest('/rest/v1/grade_data?id=eq.grade_data_single', {
+                        method: 'GET'
+                    });
                     const existing = checkResp.ok ? await checkResp.json() : [];
                     const method = (existing && existing.length > 0) ? 'PATCH' : 'POST';
                     const path = method === 'PATCH' ?
@@ -1077,7 +1050,10 @@
                     const response = await apiRequest(path, {
                         method: method,
                         body: JSON.stringify(payload),
-                        headers: { 'Prefer': 'return=representation' }
+                        headers: { 
+                            'Prefer': 'return=representation',
+                            'Content-Type': 'application/json'
+                        }
                     });
                     if (!response.ok) throw new Error(`HTTP ${response.status}`);
                     hasUnsavedChanges = false;
@@ -1093,11 +1069,9 @@
                 isSyncing = true;
                 updateSyncStatus('syncing', '同步中...');
                 try {
-                    // 如果有未保存的更改，先推送
                     if (hasUnsavedChanges) {
                         await syncToSupabase();
                     }
-                    // 再从云端拉取最新数据
                     const updated = await syncFromSupabase();
                     if (updated) {
                         renderAll();
@@ -1129,16 +1103,13 @@
                 }, 2000);
             }
 
-            // ==================== 初始化 ====================
             async function init() {
                 setupNavigation();
                 setupModalListeners();
                 setupSyncStatusClick();
 
-                // 先加载本地数据
                 loadFromLocal();
 
-                // 尝试从云端同步
                 updateSyncStatus('syncing', '连接中...');
                 try {
                     await fullSync();
@@ -1148,7 +1119,6 @@
 
                 renderAll();
 
-                // 定期自动同步（每45秒）
                 setInterval(() => {
                     if (!isSyncing && document.getElementById('syncText').textContent !== '同步中...') {
                         fullSync().catch(() => {});
@@ -1156,21 +1126,16 @@
                 }, 45000);
             }
 
-            // ==================== 导航 ====================
             function setupNavigation() {
                 document.querySelectorAll('.nav-btn').forEach(btn => {
                     btn.addEventListener('click', () => {
-                        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove(
-                            'active'));
+                        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
                         btn.classList.add('active');
-                        document.querySelectorAll('.page').forEach(p => p.classList.remove(
-                            'active'));
+                        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
                         const targetPage = document.getElementById(btn.dataset.page);
                         if (targetPage) {
                             targetPage.classList.add('active');
-                            // 切换到分析页时刷新图表
-                            if (btn.dataset.page === 'dashboard' || btn.dataset.page ===
-                                'stats') {
+                            if (btn.dataset.page === 'dashboard' || btn.dataset.page === 'stats') {
                                 setTimeout(renderCharts, 150);
                             }
                         }
@@ -1189,16 +1154,13 @@
                 });
             }
 
-            // ==================== 弹窗 ====================
             function setupModalListeners() {
                 const overlay = document.getElementById('modal');
-                // 点击遮罩关闭
                 overlay.addEventListener('click', function(e) {
                     if (e.target === overlay) {
                         closeModal();
                     }
                 });
-                // ESC 关闭
                 document.addEventListener('keydown', function(e) {
                     if (e.key === 'Escape' && overlay.classList.contains('active')) {
                         closeModal();
@@ -1241,7 +1203,6 @@
                 document.getElementById('editId').value = '';
             }
 
-            // ==================== 表单处理 ====================
             function safeParseInt(val, fallback = 0) {
                 const parsed = parseInt(val, 10);
                 return isNaN(parsed) ? fallback : parsed;
@@ -1264,7 +1225,6 @@
                     geographyScore: geographyScore
                 };
 
-                // 基本验证
                 for (const [key, val] of Object.entries(subjects)) {
                     if (key === 'politicsScore' || key === 'geographyScore') continue;
                     const maxScore = SUBJECT_MAX_SCORES[key] || 150;
@@ -1309,8 +1269,7 @@
             function deleteGrade(id) {
                 const exam = exams.find(e => e.id === id);
                 const examName = exam ? exam.name : '未知考试';
-                if (!confirm(`确定要删除「${examName}」的成绩记录吗？\n\n此操作可以撤销（重新同步云端数据），但建议谨慎操作。`))
-                    return;
+                if (!confirm(`确定要删除「${examName}」的成绩记录吗？`)) return;
                 exams = exams.filter(e => e.id !== id);
                 saveToLocal();
                 renderAll();
@@ -1318,7 +1277,6 @@
                 showToast('成绩已删除', 'info');
             }
 
-            // ==================== 渲染 ====================
             function renderAll() {
                 renderDashboard();
                 renderGradesTable();
@@ -1420,10 +1378,8 @@
                 tableEl.style.display = '';
 
                 const stats = SUBJECTS.map(subject => {
-                    const scores = exams.map(e => e.subjects[subject]).filter(v => typeof v === 'number' && !isNaN(
-                        v));
-                    if (scores.length === 0) return { name: SUBJECT_NAMES[subject], avg: '-', max: '-', min: '-',
-                        count: 0 };
+                    const scores = exams.map(e => e.subjects[subject]).filter(v => typeof v === 'number' && !isNaN(v));
+                    if (scores.length === 0) return { name: SUBJECT_NAMES[subject], avg: '-', max: '-', min: '-', count: 0 };
                     const avg = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
                     const max = Math.max(...scores);
                     const min = Math.min(...scores);
@@ -1443,7 +1399,6 @@
 
             function renderCharts() {
                 const sorted = [...exams].sort((a, b) => new Date(a.date) - new Date(b.date));
-                // 销毁旧图表
                 Object.values(charts).forEach(c => {
                     if (c && typeof c.destroy === 'function') c.destroy();
                 });
@@ -1451,7 +1406,6 @@
 
                 if (sorted.length === 0) return;
 
-                // 总分趋势图
                 const trendCtx = document.getElementById('trendChart');
                 if (trendCtx && trendCtx.getContext) {
                     const ctx = trendCtx.getContext('2d');
@@ -1492,7 +1446,6 @@
                     });
                 }
 
-                // 学科对比图（最新考试）
                 if (sorted.length > 0) {
                     const latest = sorted[sorted.length - 1];
                     const subjectCtx = document.getElementById('subjectChart');
@@ -1530,7 +1483,6 @@
                     }
                 }
 
-                // 学科趋势图
                 if (sorted.length > 1) {
                     const subTrendCtx = document.getElementById('subjectTrendChart');
                     if (subTrendCtx && subTrendCtx.getContext) {
@@ -1570,7 +1522,6 @@
                     }
                 }
 
-                // 总分分布图
                 const distCtx = document.getElementById('distributionChart');
                 if (distCtx && distCtx.getContext) {
                     const ctx = distCtx.getContext('2d');
@@ -1609,14 +1560,12 @@
                 }
             }
 
-            // ==================== 暴露全局函数 ====================
             window.openAddModal = openAddModal;
             window.openEditModal = openEditModal;
             window.closeModal = closeModal;
             window.saveGrade = saveGrade;
             window.deleteGrade = deleteGrade;
 
-            // ==================== 启动 ====================
             document.addEventListener('DOMContentLoaded', init);
         })();
     </script>
