@@ -3,485 +3,1135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>成绩管理系统</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400,500,600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <title>成绩记录与分析</title>
+    <!-- 引入 Supabase 官方 JS 库 -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+    </script>
+
     <style>
         :root {
-            --primary: #2563EB;
-            --primary-dark: #1D4ED8;
-            --bg: #F1F5F9;
-            --card: #FFFFFF;
-            --text-primary: #1E293B;
-            --text-secondary: #64748B;
-            --text-muted: #94A3B8;
-            --border: #E2E8F0;
-            --radius: 12px;
-            --radius-sm: 8px;
-            --radius-xs: 6px;
-            --transition: 0.2s;
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+            --bg: #f1f5f9;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --text-subtle: #94a3b8;
+            --radius: 10px;
+            --radius-sm: 6px;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+            --shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+            --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.12);
+            --transition: 0.2s ease;
         }
-        * {margin:0;padding:0;box-sizing:border-box;}
-        body {font-family: 'Noto Sans SC',sans-serif;background:var(--bg);color:var(--text-primary);line-height:1.6;}
-        .toast-container {position:fixed;top:80px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;}
-        .toast {padding:12px 20px;border-radius:var(--radius-sm);font-size:0.875rem;color:#fff;box-shadow:0 10px 25px -5px rgba(0,0,0,0.1);animation:toastIn 0.35s forwards,toastOut 0.3s 2.5s forwards;max-width:380px;}
-        .toast.success {background:#059669;}
-        .toast.error {background:#DC2626;}
-        .toast.info {background:#2563EB;}
-        @keyframes toastIn {from{opacity:0;transform:translateX(60px);}to{opacity:1;transform:translateX(0);}}
-        @keyframes toastOut {from{opacity:1;}to{opacity:0;}}
-        header {background:var(--card);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;}
-        .nav-container {max-width:1200px;margin:0 auto;padding:0 1.25rem;display:flex;align-items:center;justify-content:space-between;height:60px;gap:1rem;}
-        .logo {font-size:1.2rem;font-weight:700;color:var(--primary);}
-        nav {display:flex;gap:2px;background:var(--bg);border-radius:10px;padding:3px;}
-        .nav-btn {padding:0.45rem 1rem;border:none;background:transparent;color:var(--text-secondary);font-size:0.875rem;cursor:pointer;border-radius:8px;transition:var(--transition);white-space:nowrap;}
-        .nav-btn:hover {color:var(--text-primary);background:#fff;}
-        .nav-btn.active {background:#fff;color:var(--primary);font-weight:600;}
-        main {max-width:1200px;margin:0 auto;padding:1.75rem 1.25rem;}
-        .page {display:none;animation:fade 0.3s;}
-        .page.active {display:block;}
-        @keyframes fade {from{opacity:0;}to{opacity:1;}}
-        .card {background:var(--card);border-radius:var(--radius);padding:1.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.08);margin-bottom:1.5rem;border:1px solid var(--border);}
-        .card-title {font-size:1.05rem;font-weight:600;margin-bottom:1rem;}
-        .stats-grid {display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-bottom:1.5rem;}
-        .stat-card {background:var(--card);border-radius:var(--radius);padding:1.25rem 1.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.08);border:1px solid var(--border);}
-        .stat-value {font-size:2.2rem;font-weight:700;color:var(--primary);margin-bottom:0.2rem;}
-        .stat-label {font-size:0.82rem;color:var(--text-muted);}
-        .chart-container {position:relative;height:300px;margin-bottom:0.5rem;}
-        .charts-grid {display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:1.25rem;}
-        .table-wrapper {overflow-x:auto;border-radius:var(--radius-sm);}
-        table {width:100%;border-collapse:collapse;font-size:0.875rem;min-width:1200px;}
-        th,td {padding:0.7rem 0.85rem;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap;}
-        th {background:#F8FAFC;font-weight:600;color:var(--text-secondary);font-size:0.75rem;position:sticky;top:0;}
-        tbody tr:hover {background:#F8FAFC;}
-        .btn {padding:0.6rem 1.2rem;border:none;border-radius:var(--radius-xs);font-size:0.875rem;font-weight:500;cursor:pointer;transition:var(--transition);white-space:nowrap;}
-        .btn-primary {background:var(--primary);color:#fff;}
-        .btn-primary:hover {background:var(--primary-dark);}
-        .btn-secondary {background:var(--bg);color:var(--text-primary);}
-        .btn-danger {background:#EF4444;color:#fff;}
-        .btn-small {padding:0.35rem 0.7rem;font-size:0.78rem;}
-        .btn-group {display:flex;gap:0.4rem;}
-        .form-row {display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.5rem;}
-        .form-row .form-group {margin:0;flex:1;min-width:90px;}
-        .form-row label {font-size:0.75rem;margin-bottom:0.2rem;}
-        .form-row input {padding:0.4rem 0.5rem;font-size:0.8rem;}
-        .form-grid {display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:0.9rem;margin-bottom:0.75rem;}
-        .form-group {margin-bottom:0.25rem;}
-        label {display:block;margin-bottom:0.4rem;font-size:0.8rem;font-weight:600;color:var(--text-secondary);}
-        input {width:100%;padding:0.6rem 0.75rem;border:1.5px solid var(--border);border-radius:var(--radius-xs);font-size:0.9rem;background:#FAFBFC;transition:var(--transition);}
-        input:focus {outline:none;border-color:var(--primary);background:#fff;}
-        .modal-overlay {position:fixed;inset:0;background:rgba(15,23,42,0.55);display:none;align-items:center;justify-content:center;z-index:200;padding:1rem;}
-        .modal-overlay.active {display:flex;}
-        .modal {background:var(--card);border-radius:var(--radius);padding:1.75rem;width:100%;max-width:800px;max-height:85vh;overflow-y:auto;box-shadow:0 10px 25px -5px rgba(0,0,0,0.1);}
-        .modal-header {display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid var(--border);}
-        .modal-title {font-size:1.2rem;font-weight:700;}
-        .modal-close {background:var(--bg);border:none;font-size:1rem;cursor:pointer;color:var(--text-secondary);width:36px;height:36px;border-radius:50%;}
-        .action-bar {display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:0.75rem;}
-        .action-bar h2 {font-size:1.3rem;font-weight:700;}
-        .empty-state {text-align:center;padding:3rem 1.5rem;color:var(--text-muted);}
-        @media (max-width:768px) {
-            .nav-container{padding:0 0.75rem;height:54px;}
-            .logo{font-size:1rem;}
-            .nav-btn{padding:0.35rem 0.6rem;font-size:0.75rem;}
-            main{padding:1rem 0.75rem;}
-            .stats-grid{grid-template-columns:repeat(2,1fr);}
-            .stat-value{font-size:1.6rem;}
-            .form-grid{grid-template-columns:1fr 1fr;}
-            .modal{padding:1.25rem;max-width:95vw;}
-            th,td{padding:0.45rem 0.55rem;font-size:0.75rem;}
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC",
+                "Microsoft YaHei", sans-serif;
+            background: var(--bg);
+            color: var(--text-main);
+            padding: 20px;
+            min-height: 100vh;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* ========== 头部 ========== */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .header-icon {
+            width: 36px;
+            height: 36px;
+            background: var(--primary);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: #fff;
+            flex-shrink: 0;
+        }
+        h1 {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            white-space: nowrap;
+        }
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        /* ========== 按钮 ========== */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 9px 18px;
+            border-radius: var(--radius-sm);
+            border: none;
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all var(--transition);
+            background: var(--primary);
+            color: #fff;
+            white-space: nowrap;
+            text-decoration: none;
+            letter-spacing: 0.2px;
+        }
+        .btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+        }
+        .btn:active {
+            transform: translateY(0);
+            box-shadow: none;
+        }
+        .btn-outline {
+            background: transparent;
+            border: 1.5px solid var(--border);
+            color: var(--text-main);
+        }
+        .btn-outline:hover {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            transform: translateY(-1px);
+        }
+        .btn-danger {
+            background: var(--danger);
+            color: #fff;
+        }
+        .btn-danger:hover {
+            background: var(--danger-hover);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+            transform: translateY(-1px);
+        }
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 12px;
+            border-radius: 4px;
+            gap: 3px;
+        }
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-muted);
+            padding: 4px 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 13px;
+            border-radius: 4px;
+            transition: all var(--transition);
+        }
+        .btn-ghost:hover {
+            background: #f1f5f9;
+            color: var(--text-main);
+        }
+
+        /* ========== 统计卡片 ========== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: var(--card-bg);
+            padding: 18px 16px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            transition: all var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+        .stat-card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--primary);
+            border-radius: 0 3px 3px 0;
+            opacity: 0.6;
+        }
+        .stat-card:nth-child(2)::before {
+            background: #f59e0b;
+        }
+        .stat-card:nth-child(3)::before {
+            background: #10b981;
+        }
+        .stat-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+        .stat-value {
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            color: var(--text-main);
+        }
+        .stat-sub {
+            font-size: 11px;
+            color: var(--text-subtle);
+            margin-top: 2px;
+        }
+
+        /* ========== 表格区域 ========== */
+        .table-wrapper {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+        .table-header {
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            background: #fafbfc;
+        }
+        .table-header-title {
+            font-weight: 600;
+            font-size: 15px;
+            letter-spacing: -0.2px;
+        }
+        .table-header-subtitle {
+            font-size: 11px;
+            color: var(--text-subtle);
+        }
+        .table-scroll {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            white-space: nowrap;
+            min-width: 1200px;
+        }
+        thead th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: var(--text-muted);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            padding: 10px 12px;
+            text-align: center;
+            border-bottom: 2px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+        thead th .th-sub {
+            font-weight: 400;
+            font-size: 10px;
+            color: var(--text-subtle);
+            display: block;
+            text-transform: none;
+            letter-spacing: 0;
+        }
+        tbody td {
+            padding: 9px 12px;
+            text-align: center;
+            border-bottom: 1px solid #f1f5f9;
+            color: var(--text-main);
+        }
+        tbody tr {
+            transition: background var(--transition);
+        }
+        tbody tr:hover {
+            background: #f8fafc;
+        }
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+        .cell-score {
+            font-weight: 600;
+            letter-spacing: -0.2px;
+        }
+        .cell-rank {
+            font-variant-numeric: tabular-nums;
+            font-family: "SF Mono", "Cascadia Code", "Consolas", monospace;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        .cell-rank-high {
+            color: #ef4444;
+            font-weight: 600;
+        }
+        .cell-scaled {
+            font-size: 10px;
+            color: var(--text-subtle);
+            display: block;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 48px 20px;
+            color: var(--text-muted);
+        }
+        .empty-state .empty-icon {
+            font-size: 48px;
+            display: block;
+            margin-bottom: 12px;
+            opacity: 0.6;
+        }
+        .actions-cell {
+            display: flex;
+            gap: 4px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .loading-row td {
+            text-align: center;
+            padding: 32px;
+            color: var(--text-muted);
+        }
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            vertical-align: middle;
+            margin-right: 6px;
+        }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ========== 模态框 ========== */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal {
+            background: #fff;
+            width: 100%;
+            max-width: 850px;
+            max-height: 90vh;
+            border-radius: 14px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.2);
+            animation: modalIn 0.25s ease;
+        }
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.96);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        .modal-header {
+            padding: 16px 22px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fafbfc;
+        }
+        .modal-header h3 {
+            font-size: 17px;
+            font-weight: 600;
+            letter-spacing: -0.2px;
+        }
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 26px;
+            cursor: pointer;
+            color: var(--text-muted);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition);
+            line-height: 1;
+        }
+        .close-modal:hover {
+            background: #fee2e2;
+            color: #ef4444;
+        }
+        .modal-body {
+            padding: 20px 22px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        .modal-footer {
+            padding: 14px 22px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            background: #fafbfc;
+        }
+
+        /* 表单 */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .form-group label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+            letter-spacing: 0.2px;
+        }
+        .form-group input,
+        .form-group select {
+            padding: 9px 12px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            transition: all var(--transition);
+            background: #fff;
+            color: var(--text-main);
+            width: 100%;
+        }
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.08);
+        }
+        .form-group input::placeholder {
+            color: #cbd5e1;
+        }
+        .form-full {
+            grid-column: span 2;
+        }
+        .form-section-title {
+            grid-column: span 2;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-main);
+            padding-top: 8px;
+            margin-top: 4px;
+            border-top: 1px solid #f1f5f9;
+            letter-spacing: 0.3px;
+        }
+        .form-section-title:first-child {
+            border-top: none;
+            padding-top: 0;
+            margin-top: 0;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #1e293b;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 13px;
+            z-index: 2000;
+            transition: transform 0.35s cubic-bezier(0.23, 1, 0.32, 1);
+            pointer-events: none;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+            letter-spacing: 0.2px;
+        }
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+        .toast.success {
+            background: #059669;
+        }
+        .toast.error {
+            background: #dc2626;
+        }
+
+        /* ========== 移动端适应 ========== */
+        @media (max-width: 768px) {
+            body {
+                padding: 12px;
+            }
+            h1 {
+                font-size: 18px;
+            }
+            .btn {
+                padding: 7px 14px;
+                font-size: 13px;
+            }
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            .form-full,
+            .form-section-title,
+            .col-span-2 {
+                grid-column: span 1;
+            }
+            .modal {
+                max-width: 100%;
+                border-radius: 16px 16px 0 0;
+                max-height: 95vh;
+            }
+            .stats-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+            }
+            .stat-card {
+                padding: 12px 10px;
+            }
+            .stat-value {
+                font-size: 20px;
+            }
+            .stat-label {
+                font-size: 10px;
+            }
+            table {
+                min-width: 900px;
+                font-size: 11px;
+            }
+            thead th {
+                font-size: 10px;
+                padding: 8px 6px;
+            }
+            tbody td {
+                padding: 7px 6px;
+                font-size: 11px;
+            }
+            .modal-body {
+                padding: 14px;
+            }
+            .modal-header {
+                padding: 12px 16px;
+            }
+            .modal-footer {
+                padding: 10px 16px;
+            }
+        }
+        @media (max-width: 400px) {
+            .stats-grid {
+                grid-template-columns: 1fr 1fr 1fr;
+                gap: 6px;
+            }
+            .stat-card {
+                padding: 10px 8px;
+            }
+            .stat-value {
+                font-size: 18px;
+            }
+            .header-actions {
+                width: 100%;
+            }
+            .header-actions .btn {
+                flex: 1;
+                justify-content: center;
+            }
         }
     </style>
 </head>
 <body>
-
-<div class="toast-container" id="toastContainer"></div>
-<header>
-    <div class="nav-container">
-        <div class="logo">成绩管理</div>
-        <nav>
-            <button class="nav-btn active" data-page="dashboard">概览</button>
-            <button class="nav-btn" data-page="grades">成绩</button>
-            <button class="nav-btn" data-page="stats">分析</button>
-        </nav>
-    </div>
-</header>
-
-<main>
-    <div class="page active" id="dashboard">
-        <div class="stats-grid">
-            <div class="stat-card"><div class="stat-value" id="avgScore">-</div><div class="stat-label">平均总分</div></div>
-            <div class="stat-card"><div class="stat-value" id="latestExam">-</div><div class="stat-label">最近考试</div></div>
-            <div class="stat-card"><div class="stat-value" id="latestRank">-</div><div class="stat-label">最新区排</div></div>
-            <div class="stat-card"><div class="stat-value" id="totalExams">0</div><div class="stat-label">考试次数</div></div>
-        </div>
-        <div class="charts-grid">
-            <div class="card"><div class="card-title">总分趋势</div><div class="chart-container"><canvas id="trendChart"></canvas></div></div>
-            <div class="card"><div class="card-title">最新考试对比</div><div class="chart-container"><canvas id="subjectChart"></canvas></div></div>
-        </div>
-        <div class="card">
-            <div class="card-title">最近成绩</div>
-            <div class="table-wrapper">
-                <table><thead><tr><th>日期</th><th>考试</th><th>总分</th><th>区排</th><th>校排</th><th>班排</th></tr></thead><tbody></tbody></table>
+    <div class="container">
+        <!-- 头部 -->
+        <header>
+            <div class="header-left">
+                <div class="header-icon">📊</div>
+                <h1>成绩记录与分析</h1>
             </div>
-            <div class="empty-state" id="emptyRecent" style="display:none;"><p>还没有成绩记录</p></div>
-        </div>
-    </div>
+            <div class="header-actions">
+                <button class="btn" onclick="window.openAddModal()">
+                    <span>＋</span> 添加记录
+                </button>
+                <button class="btn btn-outline" onclick="window.refreshData()">
+                    <span>🔄</span> 刷新
+                </button>
+            </div>
+        </header>
 
-    <div class="page" id="grades">
-        <div class="action-bar"><h2>成绩管理</h2><button class="btn btn-primary" onclick="openAddModal()">添加成绩</button></div>
-        <div class="card">
-            <div class="table-wrapper">
+        <!-- 统计卡片 -->
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card">
+                <div class="stat-label">📋 总记录数</div>
+                <div class="stat-value" id="totalRecords">—</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">📈 平均总分</div>
+                <div class="stat-value" id="avgScore">—</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">🏆 最高总分</div>
+                <div class="stat-value" id="maxScore">—</div>
+            </div>
+        </div>
+
+        <!-- 主表格 -->
+        <div class="table-wrapper">
+            <div class="table-header">
+                <span class="table-header-title">📝 成绩列表</span>
+                <span class="table-header-subtitle" id="tableInfo">加载中…</span>
+            </div>
+            <div class="table-scroll">
                 <table>
                     <thead>
                         <tr>
-                            <th>日期</th><th>考试</th>
-                            <th>语文</th><th>语区排</th><th>语校排</th><th>语班排</th>
-                            <th>数学</th><th>数区排</th><th>数校排</th><th>数班排</th>
-                            <th>英语</th><th>英区排</th><th>英校排</th><th>英班排</th>
-                            <th>历史</th><th>历区排</th><th>历校排</th><th>历班排</th>
-                            <th>政治原</th><th>政治赋</th><th>政区排</th><th>政校排</th><th>政班排</th>
-                            <th>地理原</th><th>地理赋</th><th>地区排</th><th>地校排</th><th>地班排</th>
-                            <th>总分</th><th>区排</th><th>校排</th><th>班排</th>
                             <th>操作</th>
+                            <th>考试类型</th>
+                            <th>总分</th>
+                            <th>区名</th>
+                            <th>校名</th>
+                            <th>班名</th>
+                            <th>主科</th>
+                            <th>语文</th>
+                            <th>数学</th>
+                            <th>英语</th>
+                            <th>三科</th>
+                            <th>历史</th>
+                            <th>政治<br><span class="th-sub">原始 / 赋分</span></th>
+                            <th>地理<br><span class="th-sub">原始 / 赋分</span></th>
                         </tr>
                     </thead>
-                    <tbody></tbody>
+                    <tbody id="examTableBody">
+                        <tr class="loading-row">
+                            <td colspan="14">
+                                <span class="loading-spinner"></span>正在加载数据…
+                            </td>
+                        </tr>
+                    </tbody>
                 </table>
             </div>
-            <div class="empty-state" id="emptyGrades" style="display:none;"><p>还没有成绩记录</p></div>
         </div>
     </div>
 
-    <div class="page" id="stats">
-        <h2 style="margin-bottom:1.25rem;">统计分析</h2>
-        <div class="charts-grid">
-            <div class="card"><div class="card-title">学科趋势</div><div class="chart-container"><canvas id="subjectTrendChart"></canvas></div></div>
-            <div class="card"><div class="card-title">总分分布</div><div class="chart-container"><canvas id="distributionChart"></canvas></div></div>
-        </div>
-        <div class="card">
-            <div class="card-title">学科统计</div>
-            <div class="table-wrapper"><table><thead><tr><th>学科</th><th>平均分</th><th>最高分</th><th>最低分</th><th>次数</th></tr></thead><tbody></tbody></table></div>
-            <div class="empty-state" id="emptyStats" style="display:none;"><p>暂无数据</p></div>
+    <!-- Toast 提示 -->
+    <div class="toast" id="toast"></div>
+
+    <!-- 添加/编辑模态框 -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modalTitle">添加成绩记录</h3>
+                <button class="close-modal" onclick="window.closeModal()" aria-label="关闭">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="examForm" autocomplete="off">
+                    <input type="hidden" id="editId">
+                    <div class="form-grid">
+                        <!-- 考试类型 -->
+                        <div class="form-group form-full">
+                            <label>📌 考试类型 *</label>
+                            <input type="text" id="exam_type" placeholder="例如：高一上期末、一模、二模…" required>
+                        </div>
+
+                        <!-- 基础总分与排名 -->
+                        <div class="form-section-title">📊 总分与综合排名</div>
+                        <div class="form-group"><label>总分</label><input type="number" step="0.1" id="total_score" placeholder="0.0"></div>
+                        <div class="form-group"><label>区排名</label><input type="number" id="rank_district" placeholder="—"></div>
+                        <div class="form-group"><label>校排名</label><input type="number" id="rank_school" placeholder="—"></div>
+                        <div class="form-group"><label>班排名</label><input type="number" id="rank_class" placeholder="—"></div>
+                        <div class="form-group"><label>主科总分</label><input type="number" step="0.1" id="main_subjects_score" placeholder="0.0"></div>
+                        <div class="form-group"></div>
+
+                        <!-- 语文 -->
+                        <div class="form-section-title">📖 语文</div>
+                        <div class="form-group"><label>语文分数</label><input type="number" step="0.1" id="chinese_score" placeholder="0.0"></div>
+                        <div class="form-group"><label>语文 · 区排名</label><input type="number" id="chinese_rank_district" placeholder="—"></div>
+                        <div class="form-group"><label>语文 · 校排名</label><input type="number" id="chinese_rank_school" placeholder="—"></div>
+                        <div class="form-group"><label>语文 · 班排名</label><input type="number" id="chinese_rank_class" placeholder="—"></div>
+
+                        <!-- 数学 -->
+                        <div class="form-section-title">📐 数学</div>
+                        <div class="form-group"><label>数学分数</label><input type="number" step="0.1" id="math_score" placeholder="0.0"></div>
+                        <div class="form-group"><label>数学 · 区排名</label><input type="number" id="math_rank_district" placeholder="—"></div>
+                        <div class="form-group"><label>数学 · 校排名</label><input type="number" id="math_rank_school" placeholder="—"></div>
+                        <div class="form-group"><label>数学 · 班排名</label><input type="number" id="math_rank_class" placeholder="—"></div>
+
+                        <!-- 英语 -->
+                        <div class="form-section-title">🌐 英语</div>
+                        <div class="form-group"><label>英语分数</label><input type="number" step="0.1" id="english_score" placeholder="0.0"></div>
+                        <div class="form-group"><label>英语 · 区排名</label><input type="number" id="english_rank_district" placeholder="—"></div>
+                        <div class="form-group"><label>英语 · 校排名</label><input type="number" id="english_rank_school" placeholder="—"></div>
+                        <div class="form-group"><label>英语 · 班排名</label><input type="number" id="english_rank_class" placeholder="—"></div>
+
+                        <!-- 三科汇总 -->
+                        <div class="form-section-title">🧮 三科汇总</div>
+                        <div class="form-group"><label>三科总分</label><input type="number" step="0.1" id="three_subjects_sum" placeholder="0.0"></div>
+                        <div class="form-group"></div>
+
+                        <!-- 历史 -->
+                        <div class="form-section-title">📜 历史</div>
+                        <div class="form-group"><label>历史分数</label><input type="number" step="0.1" id="history_score" placeholder="0.0"></div>
+                        <div class="form-group"><label>历史 · 区排名</label><input type="number" id="history_rank_district" placeholder="—"></div>
+                        <div class="form-group"><label>历史 · 校排名</label><input type="number" id="history_rank_school" placeholder="—"></div>
+                        <div class="form-group"><label>历史 · 班排名</label><input type="number" id="history_rank_class" placeholder="—"></div>
+
+                        <!-- 政治 -->
+                        <div class="form-section-title">⚖️ 政治</div>
+                        <div class="form-group"><label>政治原始分</label><input type="number" step="0.1" id="politics_score" placeholder="0.0"></div>
+                        <div class="form-group"><label>政治 · 赋分</label><input type="number" step="0.1" id="politics_scaled_score" placeholder="0.0"></div>
+                        <div class="form-group"><label>政治 · 区排名</label><input type="number" id="politics_rank_district" placeholder="—"></div>
+                        <div class="form-group"><label>政治 · 校排名</label><input type="number" id="politics_rank_school" placeholder="—"></div>
+                        <div class="form-group"><label>政治 · 班排名</label><input type="number" id="politics_rank_class" placeholder="—"></div>
+
+                        <!-- 地理 -->
+                        <div class="form-section-title">🌍 地理</div>
+                        <div class="form-group"><label>地理原始分</label><input type="number" step="0.1" id="geography_score" placeholder="0.0"></div>
+                        <div class="form-group"><label>地理 · 赋分</label><input type="number" step="0.1" id="geography_scaled_score" placeholder="0.0"></div>
+                        <div class="form-group"><label>地理 · 区排名</label><input type="number" id="geography_rank_district" placeholder="—"></div>
+                        <div class="form-group"><label>地理 · 校排名</label><input type="number" id="geography_rank_school" placeholder="—"></div>
+                        <div class="form-group"><label>地理 · 班排名</label><input type="number" id="geography_rank_class" placeholder="—"></div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="window.closeModal()">取消</button>
+                <button class="btn" id="saveBtn" onclick="window.saveRecord()">💾 保存记录</button>
+            </div>
         </div>
     </div>
-</main>
 
-<div class="modal-overlay" id="modal">
-    <div class="modal">
-        <div class="modal-header"><h3 class="modal-title" id="modalTitle">添加成绩</h3><button class="modal-close" onclick="closeModal()">关闭</button></div>
-        <form id="gradeForm" onsubmit="saveGrade(event)">
-            <input type="hidden" id="editId">
-            <div class="form-grid">
-                <div class="form-group"><label>考试日期</label><input type="date" id="examDate"></div>
-                <div class="form-group"><label>考试名称</label><input type="text" id="examName"></div>
-            </div>
+    <script>
+        (function() {
+            // ==================== 配置区 ====================
+            const SUPABASE_CONFIG = {
+                url: 'https://ogfzjjlzxpxosnyxjxci.supabase.co',
+                anonKey: 'sb_publishable_WvalsHmw093vcsHkKMIU5w_0ozf0XOE'
+            };
+            const TABLE_NAME = 'exams';
+            // ================================================
 
-            <h4 style="margin:1rem 0 0.5rem 0;">语文</h4>
-            <div class="form-row">
-                <div class="form-group"><label>分数</label><input type="number" step="0.5" min="0" id="chinese"></div>
-                <div class="form-group"><label>区排名</label><input type="number" min="1" id="chineseRankDistrict"></div>
-                <div class="form-group"><label>校排名</label><input type="number" min="1" id="chineseRankSchool"></div>
-                <div class="form-group"><label>班排名</label><input type="number" min="1" id="chineseRankClass"></div>
-            </div>
+            // 初始化 Supabase（CDN 加载后全局变量名为 supabase）
+            const supabaseClient = supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
 
-            <h4 style="margin:1rem 0 0.5rem 0;">数学</h4>
-            <div class="form-row">
-                <div class="form-group"><label>分数</label><input type="number" step="0.5" min="0" id="math"></div>
-                <div class="form-group"><label>区排名</label><input type="number" min="1" id="mathRankDistrict"></div>
-                <div class="form-group"><label>校排名</label><input type="number" min="1" id="mathRankSchool"></div>
-                <div class="form-group"><label>班排名</label><input type="number" min="1" id="mathRankClass"></div>
-            </div>
+            // 全局暴露
+            window.supabase = supabaseClient;
 
-            <h4 style="margin:1rem 0 0.5rem 0;">英语</h4>
-            <div class="form-row">
-                <div class="form-group"><label>分数</label><input type="number" step="0.5" min="0" id="english"></div>
-                <div class="form-group"><label>区排名</label><input type="number" min="1" id="englishRankDistrict"></div>
-                <div class="form-group"><label>校排名</label><input type="number" min="1" id="englishRankSchool"></div>
-                <div class="form-group"><label>班排名</label><input type="number" min="1" id="englishRankClass"></div>
-            </div>
+            // DOM 元素
+            const tbody = document.getElementById('examTableBody');
+            const modal = document.getElementById('modalOverlay');
+            const form = document.getElementById('examForm');
+            const modalTitle = document.getElementById('modalTitle');
+            const editIdInput = document.getElementById('editId');
+            const saveBtn = document.getElementById('saveBtn');
+            const tableInfo = document.getElementById('tableInfo');
+            const toastEl = document.getElementById('toast');
 
-            <h4 style="margin:1rem 0 0.5rem 0;">历史</h4>
-            <div class="form-row">
-                <div class="form-group"><label>分数</label><input type="number" step="0.5" min="0" id="history"></div>
-                <div class="form-group"><label>区排名</label><input type="number" min="1" id="historyRankDistrict"></div>
-                <div class="form-group"><label>校排名</label><input type="number" min="1" id="historyRankSchool"></div>
-                <div class="form-group"><label>班排名</label><input type="number" min="1" id="historyRankClass"></div>
-            </div>
+            let isEditMode = false;
+            let toastTimer = null;
 
-            <h4 style="margin:1rem 0 0.5rem 0;">政治</h4>
-            <div class="form-row">
-                <div class="form-group"><label>原始分</label><input type="number" step="0.5" min="0" id="politicsRaw"></div>
-                <div class="form-group"><label>赋分</label><input type="number" step="0.5" min="0" id="politicsScore"></div>
-                <div class="form-group"><label>区排名</label><input type="number" min="1" id="politicsRankDistrict"></div>
-                <div class="form-group"><label>校排名</label><input type="number" min="1" id="politicsRankSchool"></div>
-                <div class="form-group"><label>班排名</label><input type="number" min="1" id="politicsRankClass"></div>
-            </div>
+            // Toast 提示
+            function showToast(message, type = '') {
+                if (toastTimer) clearTimeout(toastTimer);
+                toastEl.textContent = message;
+                toastEl.className = 'toast ' + type + ' show';
+                toastTimer = setTimeout(() => {
+                    toastEl.classList.remove('show');
+                }, 2200);
+            }
 
-            <h4 style="margin:1rem 0 0.5rem 0;">地理</h4>
-            <div class="form-row">
-                <div class="form-group"><label>原始分</label><input type="number" step="0.5" min="0" id="geographyRaw"></div>
-                <div class="form-group"><label>赋分</label><input type="number" step="0.5" min="0" id="geographyScore"></div>
-                <div class="form-group"><label>区排名</label><input type="number" min="1" id="geographyRankDistrict"></div>
-                <div class="form-group"><label>校排名</label><input type="number" min="1" id="geographyRankSchool"></div>
-                <div class="form-group"><label>班排名</label><input type="number" min="1" id="geographyRankClass"></div>
-            </div>
+            // ============ 数据获取 ============
+            async function fetchData() {
+                // 显示加载状态
+                tbody.innerHTML = `
+                        <tr class="loading-row">
+                            <td colspan="14">
+                                <span class="loading-spinner"></span>正在加载数据…
+                            </td>
+                        </tr>`;
+                tableInfo.textContent = '加载中…';
 
-            <h4 style="margin:1rem 0 0.5rem 0;">总分排名</h4>
-            <div class="form-row">
-                <div class="form-group"><label>区排名</label><input type="number" min="1" id="totalRankDistrict"></div>
-                <div class="form-group"><label>校排名</label><input type="number" min="1" id="totalRankSchool"></div>
-                <div class="form-group"><label>班排名</label><input type="number" min="1" id="totalRankClass"></div>
-            </div>
+                const { data, error } = await supabaseClient
+                    .from(TABLE_NAME)
+                    .select('*')
+                    .order('created_at', { ascending: false });
 
-            <div class="btn-group" style="justify-content:flex-end;margin-top:1rem;">
-                <button type="button" class="btn btn-secondary" onclick="closeModal()">取消</button>
-                <button type="submit" class="btn btn-primary">保存</button>
-            </div>
-        </form>
-    </div>
-</div>
+                if (error) {
+                    tbody.innerHTML = `
+                            <tr>
+                                <td colspan="14" class="empty-state">
+                                    <span class="empty-icon">⚠️</span>
+                                    数据加载失败：${error.message}
+                                    <br><button class="btn btn-sm btn-outline" style="margin-top:10px;" onclick="window.refreshData()">重试</button>
+                                </td>
+                            </tr>`;
+                    tableInfo.textContent = '加载失败';
+                    updateStats([]);
+                    showToast('数据加载失败，请检查网络连接', 'error');
+                    return;
+                }
 
-<script>
-const SUBJECTS = ['chinese','math','english','history','politicsScore','geographyScore'];
-const SUBJECT_NAMES = {chinese:'语文',math:'数学',english:'英语',history:'历史',politicsScore:'政治赋分',geographyScore:'地理赋分'};
-let exams = [];
-let charts = {};
+                renderTable(data);
+                updateStats(data);
+                tableInfo.textContent = `共 ${data.length} 条记录 · 通过 Supabase 同步`;
+            }
 
-const DEFAULT_DATA = [
-{
-  date: "2025-05-14",
-  name: "阶段性检测",
-  scores: { chinese: 93, math: 114, english: 108.5, history: 91, politicsRaw: 0, politicsScore: 94, geographyRaw: 0, geographyScore: 91 },
-  ranks: {
-    chinese: { district: 101, school: 14, class: 3 },
-    math: { district: 122, school: 17, class: 5 },
-    english: { district: 109, school: 15, class: 4 },
-    history: { district: 112, school: 16, class: 4 },
-    politicsScore: { district: 105, school: 13, class: 3 },
-    geographyScore: { district: 118, school: 18, class: 5 }
-  },
-  totalRank: { district: 115, school: 16, class: 4 },
-  total: 591.5,
-  id: "default-1"
-}
-];
+            // ============ 渲染表格 ============
+            function renderTable(data) {
+                tbody.innerHTML = '';
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = `
+                            <tr>
+                                <td colspan="14" class="empty-state">
+                                    <span class="empty-icon">📭</span>
+                                    暂无成绩数据
+                                    <br><span style="font-size:12px;color:#94a3b8;">点击右上角「添加记录」开始录入</span>
+                                </td>
+                            </tr>`;
+                    return;
+                }
 
-function showToast(msg, type){
-    const container = document.getElementById('toastContainer');
-    const el = document.createElement('div');
-    el.className = `toast ${type}`;
-    el.textContent = msg;
-    container.appendChild(el);
-    setTimeout(()=>el.remove(), 3000);
-}
-function safeNum(v){const n=parseFloat(v);return isNaN(n)?0:n;}
+                data.forEach(row => {
+                    const tr = document.createElement('tr');
+                    const politicsDisplay = buildScaledDisplay(row.politics_score, row
+                        .politics_scaled_score);
+                    const geographyDisplay = buildScaledDisplay(row.geography_score, row
+                        .geography_scaled_score);
 
-function openAddModal(){
-    document.getElementById('modalTitle').textContent='添加成绩';
-    document.getElementById('gradeForm').reset();
-    document.getElementById('editId').value='';
-    document.getElementById('examDate').valueAsDate=new Date();
-    document.getElementById('modal').classList.add('active');
-}
-function closeModal(){
-    document.getElementById('modal').classList.remove('active');
-}
+                    tr.innerHTML = `
+                            <td>
+                                <div class="actions-cell">
+                                    <button class="btn btn-sm btn-outline" onclick="window.editRecord('${row.id}')" title="编辑">✏️</button>
+                                    <button class="btn btn-sm btn-danger" onclick="window.deleteRecord('${row.id}')" title="删除">🗑</button>
+                                </div>
+                            </td>
+                            <td><strong>${escapeHtml(row.exam_type) || '—'}</strong></td>
+                            <td class="cell-score">${formatNum(row.total_score)}</td>
+                            <td class="cell-rank">${formatRank(row.rank_district)}</td>
+                            <td class="cell-rank">${formatRank(row.rank_school)}</td>
+                            <td class="cell-rank">${formatRank(row.rank_class)}</td>
+                            <td class="cell-score">${formatNum(row.main_subjects_score)}</td>
+                            <td class="cell-score">${formatNum(row.chinese_score)}</td>
+                            <td class="cell-score">${formatNum(row.math_score)}</td>
+                            <td class="cell-score">${formatNum(row.english_score)}</td>
+                            <td class="cell-score">${formatNum(row.three_subjects_sum)}</td>
+                            <td class="cell-score">${formatNum(row.history_score)}</td>
+                            <td>${politicsDisplay}</td>
+                            <td>${geographyDisplay}</td>
+                        `;
+                    tbody.appendChild(tr);
+                });
+            }
 
-function saveGrade(e){
-    e.preventDefault();
-    const id=document.getElementById('editId').value||Date.now().toString();
-    
-    const s = {
-        chinese: safeNum(document.getElementById('chinese').value),
-        math: safeNum(document.getElementById('math').value),
-        english: safeNum(document.getElementById('english').value),
-        history: safeNum(document.getElementById('history').value),
-        politicsRaw: safeNum(document.getElementById('politicsRaw').value),
-        politicsScore: safeNum(document.getElementById('politicsScore').value),
-        geographyRaw: safeNum(document.getElementById('geographyRaw').value),
-        geographyScore: safeNum(document.getElementById('geographyScore').value)
-    };
+            function buildScaledDisplay(rawScore, scaledScore) {
+                const raw = formatNum(rawScore);
+                const scaled = formatNum(scaledScore);
+                if (raw === '—' && scaled === '—') return '—';
+                return `${raw} <span class="cell-scaled">赋分: ${scaled}</span>`;
+            }
 
-    const ranks = {
-        chinese: { district: safeNum(document.getElementById('chineseRankDistrict').value), school: safeNum(document.getElementById('chineseRankSchool').value), class: safeNum(document.getElementById('chineseRankClass').value) },
-        math: { district: safeNum(document.getElementById('mathRankDistrict').value), school: safeNum(document.getElementById('mathRankSchool').value), class: safeNum(document.getElementById('mathRankClass').value) },
-        english: { district: safeNum(document.getElementById('englishRankDistrict').value), school: safeNum(document.getElementById('englishRankSchool').value), class: safeNum(document.getElementById('englishRankClass').value) },
-        history: { district: safeNum(document.getElementById('historyRankDistrict').value), school: safeNum(document.getElementById('historyRankSchool').value), class: safeNum(document.getElementById('historyRankClass').value) },
-        politicsScore: { district: safeNum(document.getElementById('politicsRankDistrict').value), school: safeNum(document.getElementById('politicsRankSchool').value), class: safeNum(document.getElementById('politicsRankClass').value) },
-        geographyScore: { district: safeNum(document.getElementById('geographyRankDistrict').value), school: safeNum(document.getElementById('geographyRankSchool').value), class: safeNum(document.getElementById('geographyRankClass').value) }
-    };
+            function formatNum(val) {
+                if (val === null || val === undefined || val === '') return '—';
+                const num = parseFloat(val);
+                if (isNaN(num)) return '—';
+                // 如果是整数就不显示小数
+                return Number.isInteger(num) ? num.toString() : num.toFixed(1);
+            }
 
-    const totalRank = {
-        district: safeNum(document.getElementById('totalRankDistrict').value),
-        school: safeNum(document.getElementById('totalRankSchool').value),
-        class: safeNum(document.getElementById('totalRankClass').value)
-    };
+            function formatRank(val) {
+                if (val === null || val === undefined || val === '') return '—';
+                const num = parseInt(val);
+                if (isNaN(num)) return '—';
+                // 排名靠前高亮
+                if (num <= 10) return `<span class="cell-rank-high">${num}</span>`;
+                return num.toString();
+            }
 
-    const total = s.chinese + s.math + s.english + s.history + s.politicsScore + s.geographyScore;
+            function escapeHtml(str) {
+                if (!str) return '';
+                const div = document.createElement('div');
+                div.textContent = str;
+                return div.innerHTML;
+            }
 
-    const data = {
-        id,
-        date: document.getElementById('examDate').value || '',
-        name: document.getElementById('examName').value.trim() || '未命名考试',
-        scores: s,
-        ranks,
-        totalRank,
-        total
-    };
+            // ============ 更新统计 ============
+            function updateStats(data) {
+                const totalEl = document.getElementById('totalRecords');
+                const avgEl = document.getElementById('avgScore');
+                const maxEl = document.getElementById('maxScore');
 
-    const idx = exams.findIndex(x => x.id === id);
-    if(idx >= 0) exams[idx] = data;
-    else exams.push(data);
+                if (!data || data.length === 0) {
+                    totalEl.textContent = '0';
+                    avgEl.textContent = '—';
+                    maxEl.textContent = '—';
+                    return;
+                }
 
-    localStorage.setItem('gradeData', JSON.stringify({ exams }));
-    renderAll();
-    closeModal();
-    showToast(idx >= 0 ? '已更新' : '已添加', 'success');
-}
+                totalEl.textContent = data.length;
 
-function openEditModal(id){
-    const item = exams.find(x=>x.id===id);
-    if(!item)return;
-    document.getElementById('modalTitle').textContent='编辑成绩';
-    document.getElementById('editId').value=id;
-    document.getElementById('examDate').value=item.date;
-    document.getElementById('examName').value=item.name;
-    document.getElementById('chinese').value=item.scores.chinese;
-    document.getElementById('math').value=item.scores.math;
-    document.getElementById('english').value=item.scores.english;
-    document.getElementById('history').value=item.scores.history;
-    document.getElementById('politicsRaw').value=item.scores.politicsRaw;
-    document.getElementById('politicsScore').value=item.scores.politicsScore;
-    document.getElementById('geographyRaw').value=item.scores.geographyRaw;
-    document.getElementById('geographyScore').value=item.scores.geographyScore;
-    document.getElementById('chineseRankDistrict').value=item.ranks.chinese.district;
-    document.getElementById('chineseRankSchool').value=item.ranks.chinese.school;
-    document.getElementById('chineseRankClass').value=item.ranks.chinese.class;
-    document.getElementById('mathRankDistrict').value=item.ranks.math.district;
-    document.getElementById('mathRankSchool').value=item.ranks.math.school;
-    document.getElementById('mathRankClass').value=item.ranks.math.class;
-    document.getElementById('englishRankDistrict').value=item.ranks.english.district;
-    document.getElementById('englishRankSchool').value=item.ranks.english.school;
-    document.getElementById('englishRankClass').value=item.ranks.english.class;
-    document.getElementById('historyRankDistrict').value=item.ranks.history.district;
-    document.getElementById('historyRankSchool').value=item.ranks.history.school;
-    document.getElementById('historyRankClass').value=item.ranks.history.class;
-    document.getElementById('politicsRankDistrict').value=item.ranks.politicsScore.district;
-    document.getElementById('politicsRankSchool').value=item.ranks.politicsScore.school;
-    document.getElementById('politicsRankClass').value=item.ranks.politicsScore.class;
-    document.getElementById('geographyRankDistrict').value=item.ranks.geographyScore.district;
-    document.getElementById('geographyRankSchool').value=item.ranks.geographyScore.school;
-    document.getElementById('geographyRankClass').value=item.ranks.geographyScore.class;
-    document.getElementById('totalRankDistrict').value=item.totalRank.district;
-    document.getElementById('totalRankSchool').value=item.totalRank.school;
-    document.getElementById('totalRankClass').value=item.totalRank.class;
-    document.getElementById('modal').classList.add('active');
-}
+                let totalSum = 0,
+                    count = 0,
+                    maxS = -Infinity;
+                data.forEach(row => {
+                    if (row.total_score !== null && row.total_score !== undefined && row.total_score !== '') {
+                        const val = parseFloat(row.total_score);
+                        if (!isNaN(val)) {
+                            totalSum += val;
+                            count++;
+                            if (val > maxS) maxS = val;
+                        }
+                    }
+                });
 
-function deleteGrade(id){
-    if(!confirm('确定删除？'))return;
-    exams=exams.filter(x=>x.id!==id);
-    localStorage.setItem('gradeData',JSON.stringify({exams}));
-    renderAll();
-    showToast('已删除','info');
-}
+                avgEl.textContent = count > 0 ? (totalSum / count).toFixed(1) : '—';
+                maxEl.textContent = maxS > -Infinity ? maxS : '—';
+            }
 
-function renderAll(){renderDashboard();renderGrades();renderStats();renderCharts();}
-function renderDashboard(){
-    const list=[...exams].sort((a,b)=>new Date(b.date)-new Date(a.date));
-    document.getElementById('totalExams').textContent=exams.length;
-    if(list.length){
-        const last=list[0];
-        const avg=(list.reduce((t,c)=>t+(c.total||0),0)/list.length).toFixed(1);
-        document.getElementById('avgScore').textContent=avg;
-        document.getElementById('latestExam').textContent=last.name;
-        document.getElementById('latestRank').textContent=`#${last.totalRank.district}`;
-    }else{
-        document.getElementById('avgScore').textContent='-';
-        document.getElementById('latestExam').textContent='-';
-        document.getElementById('latestRank').textContent='-';
-    }
-    const tb=document.querySelector('#dashboard tbody');
-    const empty=document.getElementById('emptyRecent');
-    if(!list.length){tb.innerHTML='';empty.style.display='block';return;}
-    empty.style.display='none';
-    tb.innerHTML=list.slice(0,5).map(x=>`<tr><td>${x.date}</td><td>${x.name}</td><td>${x.total}</td><td>#${x.totalRank.district}</td><td>#${x.totalRank.school}</td><td>#${x.totalRank.class}</td></tr>`).join('');
-}
-function renderGrades(){
-    const list=[...exams].sort((a,b)=>new Date(b.date)-new Date(a.date));
-    const tb=document.querySelector('#grades tbody');
-    const empty=document.getElementById('emptyGrades');
-    if(!list.length){tb.innerHTML='';empty.style.display='block';return;}
-    empty.style.display='none';
-    tb.innerHTML=list.map(x=>`<tr>
-        <td>${x.date || '-'}</td><td>${x.name}</td>
-        <td>${x.scores.chinese || '-'}</td><td>${x.ranks.chinese.district ? '#'+x.ranks.chinese.district : '-'}</td><td>${x.ranks.chinese.school ? '#'+x.ranks.chinese.school : '-'}</td><td>${x.ranks.chinese.class ? '#'+x.ranks.chinese.class : '-'}</td>
-        <td>${x.scores.math || '-'}</td><td>${x.ranks.math.district ? '#'+x.ranks.math.district : '-'}</td><td>${x.ranks.math.school ? '#'+x.ranks.math.school : '-'}</td><td>${x.ranks.math.class ? '#'+x.ranks.math.class : '-'}</td>
-        <td>${x.scores.english || '-'}</td><td>${x.ranks.english.district ? '#'+x.ranks.english.district : '-'}</td><td>${x.ranks.english.school ? '#'+x.ranks.english.school : '-'}</td><td>${x.ranks.english.class ? '#'+x.ranks.english.class : '-'}</td>
-        <td>${x.scores.history || '-'}</td><td>${x.ranks.history.district ? '#'+x.ranks.history.district : '-'}</td><td>${x.ranks.history.school ? '#'+x.ranks.history.school : '-'}</td><td>${x.ranks.history.class ? '#'+x.ranks.history.class : '-'}</td>
-        <td>${x.scores.politicsRaw || '-'}</td><td>${x.scores.politicsScore || '-'}</td><td>${x.ranks.politicsScore.district ? '#'+x.ranks.politicsScore.district : '-'}</td><td>${x.ranks.politicsScore.school ? '#'+x.ranks.politicsScore.school : '-'}</td><td>${x.ranks.politicsScore.class ? '#'+x.ranks.politicsScore.class : '-'}</td>
-        <td>${x.scores.geographyRaw || '-'}</td><td>${x.scores.geographyScore || '-'}</td><td>${x.ranks.geographyScore.district ? '#'+x.ranks.geographyScore.district : '-'}</td><td>${x.ranks.geographyScore.school ? '#'+x.ranks.geographyScore.school : '-'}</td><td>${x.ranks.geographyScore.class ? '#'+x.ranks.geographyScore.class : '-'}</td>
-        <td><strong>${x.total || 0}</strong></td>
-        <td>${x.totalRank.district ? '#'+x.totalRank.district : '-'}</td><td>${x.totalRank.school ? '#'+x.totalRank.school : '-'}</td><td>${x.totalRank.class ? '#'+x.totalRank.class : '-'}</td>
-        <td><div class="btn-group"><button class="btn btn-secondary btn-small" onclick="openEditModal('${x.id}')">编辑</button><button class="btn btn-danger btn-small" onclick="deleteGrade('${x.id}')">删除</button></div></td>
-    </tr>`).join('');
-}
-function renderStats(){
-    const tb=document.querySelector('#statsTable tbody');
-    const empty=document.getElementById('emptyStats');
-    if(!exams.length){tb.innerHTML='';empty.style.display='block';return;}
-    empty.style.display='none';
-    const st=SUBJECTS.map(sub=>{
-        const sc=exams.map(x=>x.scores[sub]).filter(x=>x>0);
-        if(!sc.length)return{n:SUBJECT_NAMES[sub],a:'-',m:'-',mi:'-',c:0};
-        const a=(sc.reduce((p,c)=>p+c,0)/sc.length).toFixed(1);
-        const m=Math.max(...sc);
-        const mi=Math.min(...sc);
-        return{n:SUBJECT_NAMES[sub],a,m,mi,c:sc.length};
-    });
-    tb.innerHTML=st.map(x=>`<tr><td><strong>${x.n}</strong></td><td>${x.a}</td><td>${x.m}</td><td>${x.mi}</td><td>${x.c}</td></tr>`).join('');
-}
-function renderCharts(){
-    Object.values(charts).forEach(c=>c?.destroy());
-    charts={};
-    const list=[...exams].sort((a,b)=>new Date(a.date)-new Date(b.date));
-    if(!list.length)return;
-    const t=document.getElementById('trendChart')?.getContext('2d');
-    if(t)charts.trend=new Chart(t,{type:'line',data:{labels:list.map(x=>x.name),datasets:[{data:list.map(x=>x.total),borderColor:'#2563EB',backgroundColor:'rgba(37,99,235,0.08)',fill:true}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}});
-    const last=list.at(-1);
-    const c=document.getElementById('subjectChart')?.getContext('2d');
-    if(c)charts.subject=new Chart(c,{type:'bar',data:{labels:SUBJECTS.map(x=>SUBJECT_NAMES[x]),datasets:[{data:SUBJECTS.map(x=>last.scores[x]),backgroundColor:['#EF4444','#F59E0B','#10B981','#3B82F6','#8B5CF6','#06B6D4']}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}});
-    const st=document.getElementById('subjectTrendChart')?.getContext('2d');
-    if(st)charts.subjectTrend=new Chart(st,{type:'line',data:{labels:list.map(x=>x.name),datasets:SUBJECTS.map((x,i)=>({label:SUBJECT_NAMES[x],data:list.map(d=>d.scores[x]),borderColor:['#EF4444','#F59E0B','#10B981','#3B82F6','#8B5CF6','#06B6D4'][i],backgroundColor:'transparent'}))},options:{responsive:true,maintainAspectRatio:false}});
-    const d=document.getElementById('distributionChart')?.getContext('2d');
-    if(d)charts.distribution=new Chart(d,{type:'bar',data:{labels:list.map(x=>x.name),datasets:[{data:list.map(x=>x.total),backgroundColor:'rgba(37,99,235,0.6)'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}});
-}
+            // ============ 模态框操作 ============
+            window.openAddModal = function() {
+                isEditMode = false;
+                modalTitle.textContent = '✏️ 添加成绩记录';
+                editIdInput.value = '';
+                form.reset();
+                saveBtn.textContent = '💾 保存记录';
+                modal.classList.add('active');
+                // 聚焦第一个输入框
+                setTimeout(() => {
+                    document.getElementById('exam_type').focus();
+                }, 150);
+            };
 
-document.addEventListener('DOMContentLoaded',()=>{
-    let data = localStorage.getItem('gradeData');
-    if(data){
-        try{exams=JSON.parse(data).exams||[];}catch{exams=DEFAULT_DATA;}
-    }else{
-        exams = DEFAULT_DATA;
-    }
-    localStorage.setItem('gradeData',JSON.stringify({exams}));
-    document.querySelectorAll('.nav-btn').forEach(n=>{
-        n.addEventListener('click',()=>{
-            document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));
-            n.classList.add('active');
-            document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-            document.getElementById(n.dataset.page).classList.add('active');
-            setTimeout(renderCharts,100);
-        });
-    });
-    renderAll();
-});
+            window.editRecord = async function(id) {
+                isEditMode = true;
+                modalTitle.textContent = '✏️ 编辑成绩记录';
+                editIdInput.value = id;
+                saveBtn.textContent = '💾 更新记录';
 
-window.openAddModal=openAddModal;
-window.closeModal=closeModal;
-window.saveGrade=saveGrade;
-window.openEditModal=openEditModal;
-window.deleteGrade=deleteGrade;
-</script>
+                // 先显示加载状态
+                modal.classList.add('active');
+
+                const { data, error } = await supabaseClient
+                    .from(TABLE_NAME)
+                    .select('*')
+                    .eq('id', id)
+                    .single();
+
+                if (error) {
+                    showToast('获取数据失败: ' + error.message, 'error');
+                    closeModal();
+                    return;
+                }
+
+                if (!data) {
+                    showToast('未找到该记录', 'error');
+                    closeModal();
+                    return;
+                }
+
+                // 填充表单
+                const fields = [
+                    'exam_type', 'total_score', 'rank_district', 'rank_school', 'rank_class',
+                    'main_subjects_score',
+                    'chinese_score', 'chinese_rank_district', 'chinese_rank_school', 'chinese_rank_class',
+                    'math_score', 'math_rank_district', 'math_rank_school', 'math_rank_class',
+                    'english_score', 'english_rank_district', 'english_rank_school', 'english_rank_class',
+                    'three_subjects_sum',
+                    'history_score', 'history_rank_district', 'history_rank_school', 'history_rank_class',
+                    'politics_score', 'politics_scaled_score', 'politics_rank_district', 'politics_rank_school',
+                    'politics_rank_class',
+                    'geography_score', 'geography_scaled_score', 'geography_rank_district', 'geography_rank_school',
+                    'geography_rank_class'
+                ];
+
+                fields.forEach(field => {
+                    const el = document.getElementById(field);
+                    if (el) {
+                        const val = data[field];
+                        el.value = (val !== null && val !== undefined) ? val : '';
+                    }
+                });
+            };
+
+            window.closeModal = function() {
+                modal.classList.remove('active');
+                // 清理表单
+                form.reset();
+                editIdInput.value = '';
+            };
+
+            // 点击遮罩关闭
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    closeModal();
+                }
+            });
+
+            // ESC 关闭
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && modal.classList.contains('active')) {
+                    closeModal();
+                }
+            });
+
+            // ============ 保存记录 ============
+            window.saveRecord = async function() {
+                const examType = document.getElementById('exam_type').value.trim();
+                if (!examType) {
+                    showToast('请输入考试类型', 'error');
+                    document.getElementById('exam_type').focus();
+                    return;
+                }
+
+                // 收集表单数据
+                const numericFields = [
+                    'total_score', 'rank_district', 'rank_school', 'rank_class', 'main_subjects_score',
+                    'chinese_score', 'chinese_rank_district', 'chinese_rank_school', 'chinese_rank_class',
+                    'math_score', 'math_rank_district', 'math_rank_school', 'math_rank_class',
+                    'english_score', 'english_rank_district', 'english_rank_school', 'english_rank_class',
+                    'three_subjects_sum',
+                    'history_score', 'history_rank_district', 'history_rank_school', 'history_rank_class',
+                    'politics_score', 'politics_scaled_score', 'politics_rank_district', 'politics_rank_school',
+                    'politics_rank_class',
+                    'geography_score', 'geography_scaled_score', 'geography_rank_district', 'geography_rank_school',
+                    'geography_rank_class'
+                ];
+
+                const data = {};
+                // 考试类型
+                data['exam_type'] = examType;
+
+                // 数值字段
+                numericFields.forEach(field => {
+                    const el = document.getElementById(field);
+                    if (el && el.value.trim() !== '') {
+                        const val = parseFloat(el.value);
+                        if (!isNaN(val)) {
+                            data[field] = val;
+                        }
+                    }
+                    // 如果为空则不传该字段（让数据库保持 null）
+                });
+
+                const editId = editIdInput.value;
+                saveBtn.textContent = '⏳ 保存中…';
+                saveBtn.disabled = true;
+
+                let error = null;
+                if (editId) {
+                    const result = await supabaseClient.from(TABLE_NAME).update(data).eq('id', editId);
+                    error = result.error;
+                } else {
+                    const result = await supabaseClient.from(TABLE_NAME).insert(data);
+                    error = result.error;
+                }
+
+                saveBtn.textContent = '💾 保存记录';
+                saveBtn.disabled = false;
+
+                if (error) {
+                    showToast('保存失败: ' + error.message, 'error');
+                    console.error('保存失败:', error);
+                } else {
+                    closeModal();
+                    await fetchData();
+                    showToast(editId ? '✅ 记录已更新' : '✅ 记录已添加', 'success');
+                }
+            };
+
+            // ============ 删除记录 ============
+            window.deleteRecord = async function(id) {
+                if (!confirm('⚠️ 确定要删除这条成绩记录吗？\n\n此操作不可恢复。')) return;
+
+                const { error } = await supabaseClient.from(TABLE_NAME).delete().eq('id', id);
+                if (error) {
+                    showToast('删除失败: ' + error.message, 'error');
+                    console.error('删除失败:', error);
+                } else {
+                    showToast('🗑 记录已删除', 'success');
+                    await fetchData();
+                }
+            };
+
+            // ============ 刷新数据 ============
+            window.refreshData = function() {
+                fetchData();
+                showToast('🔄 数据已刷新', '');
+            };
+
+            // ============ 表单回车提交 ============
+            form.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey && e.target.tagName === 'INPUT') {
+                    e.preventDefault();
+                    // 找到下一个输入框并聚焦
+                    const inputs = Array.from(form.querySelectorAll('input:not([type="hidden"])'));
+                    const currentIndex = inputs.indexOf(e.target);
+                    if (currentIndex < inputs.length - 1) {
+                        inputs[currentIndex + 1].focus();
+                    } else {
+                        // 最后一个输入框，触发保存
+                        window.saveRecord();
+                    }
+                }
+            });
+
+            // ============ 初始化 ============
+            fetchData();
+        })();
+    </script>
 </body>
 </html>
