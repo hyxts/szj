@@ -697,17 +697,19 @@
         async function loadData() {
             updateSyncStatus('syncing', '同步中...');
 
-            try {
-                await syncFromSupabase();
-            } catch (e) {
-                console.log('从云端加载失败，使用本地数据');
-                const local = localStorage.getItem('gradeData');
-                if (local) {
-                    exams = JSON.parse(local).exams || [];
-                }
+            // 先加载本地数据
+            const local = localStorage.getItem('gradeData');
+            if (local) {
+                exams = JSON.parse(local).exams || [];
             }
 
-            updateSyncStatus('connected', '已同步');
+            try {
+                await syncFromSupabase();
+                updateSyncStatus('connected', '已同步');
+            } catch (e) {
+                console.log('从云端加载失败，使用本地数据');
+                updateSyncStatus('error', '离线模式');
+            }
         }
 
         // 数据保存
@@ -732,6 +734,7 @@
             const timeoutId = setTimeout(() => controller.abort(), 10000);
 
             try {
+                console.log('开始从Supabase同步数据...');
                 const response = await fetch(`${SUPABASE_CONFIG.url}/rest/v1/grade_data?id=eq.grade_data_single`, {
                     headers: {
                         'apikey': SUPABASE_CONFIG.key,
@@ -741,19 +744,35 @@
                 });
 
                 clearTimeout(timeoutId);
+                console.log('响应状态:', response.status, response.statusText);
 
                 if (response.ok) {
                     const data = await response.json();
+                    console.log('接收到数据:', data);
+
                     if (data && data.length > 0 && data[0].exams) {
                         const localData = localStorage.getItem('gradeData');
                         const localUpdatedAt = localData ? new Date(JSON.parse(localData).updatedAt).getTime() : 0;
                         const cloudUpdatedAt = data[0].updatedAt ? new Date(data[0].updatedAt).getTime() : 0;
 
+                        console.log('本地更新时间:', localUpdatedAt);
+                        console.log('云端更新时间:', cloudUpdatedAt);
+
                         if (cloudUpdatedAt > localUpdatedAt) {
                             exams = data[0].exams || [];
                             saveToLocal();
+                            console.log('已从云端更新数据');
+                        } else {
+                            console.log('本地数据较新，无需更新');
                         }
+                    } else {
+                        console.log('云端没有数据或数据格式不对');
                     }
+                } else {
+                    console.error('请求失败，状态码:', response.status);
+                    const errorText = await response.text();
+                    console.error('错误详情:', errorText);
+                    throw new Error(`请求失败: ${response.status}`);
                 }
             } catch (e) {
                 console.log('同步失败:', e);
@@ -770,6 +789,8 @@
                     exams: exams,
                     updatedAt: new Date().toISOString()
                 };
+
+                console.log('准备上传数据:', data);
 
                 const checkController = new AbortController();
                 setTimeout(() => checkController.abort(), 10000);
@@ -788,6 +809,9 @@
                     ? `${SUPABASE_CONFIG.url}/rest/v1/grade_data?id=eq.grade_data_single`
                     : `${SUPABASE_CONFIG.url}/rest/v1/grade_data`;
 
+                console.log('上传方法:', method);
+                console.log('上传URL:', url);
+
                 const uploadController = new AbortController();
                 setTimeout(() => uploadController.abort(), 10000);
 
@@ -803,9 +827,14 @@
                     signal: uploadController.signal
                 });
 
+                console.log('上传响应状态:', response.status, response.statusText);
+
                 if (response.ok) {
                     updateSyncStatus('connected', '已同步');
+                    console.log('上传成功');
                 } else {
+                    const errorText = await response.text();
+                    console.error('上传失败，错误详情:', errorText);
                     updateSyncStatus('error', '同步失败');
                 }
             } catch (e) {
