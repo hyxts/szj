@@ -4838,46 +4838,24 @@
         }
 
         // ================================================
-        // Supabase同步模块
+        // Supabase同步模块 (使用原生fetch API)
         // ================================================
 
-        // 初始化Supabase客户端
-        function initSupabase(url, key) {
-            try {
-                var cleanUrl = url.replace(/\/rest\/v1\/?$/, '');
-                
-                // 尝试多种SDK加载方式
-                var createClientFunc = null;
-                
-                // 方式1: 直接从window对象
-                if (window.createClient) {
-                    createClientFunc = window.createClient;
-                }
-                // 方式2: 从supabase对象
-                else if (window.supabase && typeof window.supabase === 'function') {
-                    createClientFunc = window.supabase;
-                }
-                // 方式3: 从supabase.createClient
-                else if (window.supabase && window.supabase.createClient) {
-                    createClientFunc = window.supabase.createClient;
-                }
-                
-                if (createClientFunc) {
-                    supabase = createClientFunc(cleanUrl, key, {
-                        auth: {
-                            autoRefreshToken: false,
-                            persistSession: false,
-                            detectSessionInUrl: false
-                        }
-                    });
-                    return supabase !== null;
-                }
-                console.error('Supabase SDK未加载或版本不兼容');
-                return false;
-            } catch (e) {
-                console.error('初始化Supabase失败:', e);
-                return false;
-            }
+        var supabaseConfig = null;
+
+        // 获取当前配置
+        function getSupabaseConfig() {
+            if (supabaseConfig) return supabaseConfig;
+            
+            var url = document.getElementById('supabaseUrl').value.trim();
+            var key = document.getElementById('supabaseKey').value.trim();
+            
+            if (!url || !key) return null;
+            
+            return {
+                url: url.replace(/\/rest\/v1\/?$/, ''),
+                key: key
+            };
         }
 
         // 保存Supabase配置
@@ -4890,19 +4868,15 @@
                 return;
             }
 
-            // 清理URL格式
             var cleanUrl = url.replace(/\/rest\/v1\/?$/, '');
+            supabaseConfig = { url: cleanUrl, key: key };
             
             if (isLocalStorageAvailable()) {
-                localStorage.setItem('supabaseConfig', JSON.stringify({ url: cleanUrl, key: key }));
+                localStorage.setItem('supabaseConfig', JSON.stringify(supabaseConfig));
             }
 
-            if (initSupabase(cleanUrl, key)) {
-                testSupabaseConnection();
-                showToast('Supabase配置已保存', 'success');
-            } else {
-                showToast('配置保存失败，请检查参数', 'error');
-            }
+            testSupabaseConnection();
+            showToast('Supabase配置已保存', 'success');
         }
 
         // 加载Supabase配置
@@ -4912,20 +4886,19 @@
                 var config = localStorage.getItem('supabaseConfig');
                 if (config) {
                     var parsed = JSON.parse(config);
+                    supabaseConfig = parsed;
                     var urlInput = document.getElementById('supabaseUrl');
                     var keyInput = document.getElementById('supabaseKey');
                     if (urlInput) urlInput.value = parsed.url || '';
                     if (keyInput) keyInput.value = parsed.key || '';
-                    if (parsed.url && parsed.key) {
-                        var cleanUrl = parsed.url.replace(/\/rest\/v1\/?$/, '');
-                        initSupabase(cleanUrl, parsed.key);
-                    }
                 } else {
-                    // 如果没有保存的配置，使用页面上预填的值初始化
                     var url = document.getElementById('supabaseUrl').value;
                     var key = document.getElementById('supabaseKey').value;
                     if (url && key && url !== 'https://your-project.supabase.co') {
-                        initSupabase(url, key);
+                        supabaseConfig = {
+                            url: url.replace(/\/rest\/v1\/?$/, ''),
+                            key: key
+                        };
                     }
                 }
             } catch (e) {
@@ -4944,32 +4917,35 @@
             statusDiv.textContent = '正在连接...';
             
             try {
-                if (!supabase) {
-                    var url = document.getElementById('supabaseUrl').value.trim();
-                    var key = document.getElementById('supabaseKey').value.trim();
-                    if (!initSupabase(url, key)) {
-                        throw new Error('初始化Supabase客户端失败');
-                    }
+                var config = getSupabaseConfig();
+                if (!config) {
+                    throw new Error('请先配置Supabase');
                 }
                 
-                // 尝试查询表
-                var { data, error } = await supabase.from('grade_data').select('id').limit(1);
+                var response = await fetch(`${config.url}/rest/v1/grade_data?select=id&limit=1`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': config.key,
+                        'Authorization': `Bearer ${config.key}`
+                    }
+                });
                 
-                if (error) {
-                    if (error.code === '42P01' || error.code === 'PGRST116' || error.message && error.message.includes('does not exist')) {
-                        // 表不存在，提示用户需要在Supabase创建表
+                if (response.ok) {
+                    statusDiv.style.background = '#D1FAE5';
+                    statusDiv.style.color = '#065F46';
+                    statusDiv.textContent = '连接成功！数据库表已就绪';
+                    updateSyncStatus('connected');
+                } else {
+                    var error = await response.json();
+                    if (error.code === '42P01' || error.message && error.message.includes('does not exist')) {
                         statusDiv.style.background = '#FEF3C7';
                         statusDiv.style.color = '#92400E';
                         statusDiv.innerHTML = '连接成功！<br><small>请在Supabase SQL编辑器中创建数据表</small>';
                         updateSyncStatus('connected');
                     } else {
-                        throw error;
+                        throw new Error(error.message || '未知错误');
                     }
-                } else {
-                    statusDiv.style.background = '#D1FAE5';
-                    statusDiv.style.color = '#065F46';
-                    statusDiv.textContent = '连接成功！数据库表已就绪';
-                    updateSyncStatus('connected');
                 }
             } catch (e) {
                 console.error('连接失败:', e);
@@ -5016,7 +4992,8 @@
 
         // 同步数据到Supabase
         async function syncToSupabase() {
-            if (!supabase) {
+            var config = getSupabaseConfig();
+            if (!config) {
                 showToast('请先配置Supabase', 'error');
                 return;
             }
@@ -5048,11 +5025,35 @@
                     updatedAt: now.toISOString()
                 };
                 
-                var { error } = await supabase.from('grade_data').upsert(dataToSync);
+                // 先检查是否存在记录
+                var checkResponse = await fetch(`${config.url}/rest/v1/grade_data?id=eq.grade_data_single`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': config.key,
+                        'Authorization': `Bearer ${config.key}`
+                    }
+                });
                 
-                if (error) throw error;
+                var checkData = await checkResponse.json();
+                var method = checkData && checkData.length > 0 ? 'PATCH' : 'POST';
                 
-                // 更新本地最后修改时间
+                var response = await fetch(`${config.url}/rest/v1/grade_data${method === 'PATCH' ? '?id=eq.grade_data_single' : ''}`, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': config.key,
+                        'Authorization': `Bearer ${config.key}`,
+                        'Prefer': 'return=representation'
+                    },
+                    body: JSON.stringify(dataToSync)
+                });
+                
+                if (!response.ok) {
+                    var error = await response.json();
+                    throw new Error(error.message || '上传失败');
+                }
+                
                 localStorage.setItem('localDataLastUpdate', now.getTime().toString());
                 
                 lastSyncTime = Date.now();
@@ -5067,7 +5068,8 @@
 
         // 从Supabase同步数据（带冲突解决）
         async function syncFromSupabase() {
-            if (!supabase) {
+            var config = getSupabaseConfig();
+            if (!config) {
                 showToast('请先配置Supabase', 'error');
                 return;
             }
@@ -5075,34 +5077,45 @@
             try {
                 showToast('正在检查云端数据...', 'info');
                 
-                var { data, error } = await supabase.from('grade_data').select('*').eq('id', 'grade_data_single').single();
+                var response = await fetch(`${config.url}/rest/v1/grade_data?id=eq.grade_data_single`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': config.key,
+                        'Authorization': `Bearer ${config.key}`
+                    }
+                });
                 
-                if (error) {
-                    if (error.code === 'PGRST116') {
+                if (!response.ok) {
+                    var error = await response.json();
+                    if (error.code === '42P01' || error.message && error.message.includes('does not exist')) {
                         showToast('云端暂无数据', 'info');
                         return;
                     }
-                    throw error;
+                    throw new Error(error.message || '查询失败');
                 }
                 
+                var dataList = await response.json();
+                if (!dataList || dataList.length === 0) {
+                    showToast('云端暂无数据', 'info');
+                    return;
+                }
+                
+                var data = dataList[0];
+                
                 if (data && data.exams) {
-                    // 获取本地和云端的更新时间
                     var localLastUpdate = localStorage.getItem('localDataLastUpdate');
                     var cloudUpdatedAt = data.updatedAt ? new Date(data.updatedAt).getTime() : 0;
                     var localUpdatedAt = localLastUpdate ? parseInt(localLastUpdate) : 0;
                     
                     var shouldMerge = false;
                     
-                    // 比较时间戳，决定如何处理冲突
                     if (cloudUpdatedAt > localUpdatedAt && localUpdatedAt > 0) {
-                        // 云端更新，提示用户
                         if (!confirm('云端数据比本地新，是否覆盖本地数据？\n\n点击"取消"将尝试合并数据。')) {
                             shouldMerge = true;
                         }
                     } else if (localUpdatedAt > cloudUpdatedAt) {
-                        // 本地更新，提示用户
                         if (!confirm('本地数据比云端新，是否继续下载？\n\n点击"取消"将保留本地数据并上传到云端。')) {
-                            // 用户选择保留本地，直接上传
                             await syncToSupabase();
                             return;
                         }
@@ -5111,12 +5124,10 @@
                     }
                     
                     if (shouldMerge) {
-                        // 简单的合并策略：合并考试记录，以考试ID去重，保留最新的
                         showToast('正在合并数据...', 'info');
                         var mergedExams = [];
                         var examIds = new Set();
                         
-                        // 先添加本地数据
                         exams.forEach(function(exam) {
                             if (!examIds.has(exam.id)) {
                                 examIds.add(exam.id);
@@ -5124,7 +5135,6 @@
                             }
                         });
                         
-                        // 再添加云端数据（不会重复添加）
                         data.exams.forEach(function(exam) {
                             if (!examIds.has(exam.id)) {
                                 examIds.add(exam.id);
@@ -5132,14 +5142,12 @@
                             }
                         });
                         
-                        // 按日期排序
                         mergedExams.sort(function(a, b) {
                             return new Date(a.date) - new Date(b.date);
                         });
                         
                         exams = mergedExams;
                     } else {
-                        // 直接覆盖
                         exams = data.exams;
                     }
                     
@@ -5153,7 +5161,6 @@
                         data.benchmarkSettings ? saveBenchmarkSettingsToDB(data.benchmarkSettings) : Promise.resolve()
                     ]);
                     
-                    // 更新本地最后修改时间
                     localStorage.setItem('localDataLastUpdate', cloudUpdatedAt.toString());
                     
                     updateUI();
@@ -5193,7 +5200,7 @@
         function startAutoSync() {
             stopAutoSync();
             autoSyncTimer = setInterval(function() {
-                if (supabase && syncStatus === 'connected') {
+                if (getSupabaseConfig() && syncStatus === 'connected') {
                     syncToSupabase();
                 }
             }, syncInterval);
