@@ -4856,8 +4856,10 @@
 
         // 自动连接并同步（启动时自动执行）
         async function autoConnectAndSync() {
+            console.log('开始自动连接和同步...');
             try {
                 await testSupabaseConnection();
+                console.log('测试连接完成，当前状态:', syncStatus);
                 
                 if (syncStatus === 'connected') {
                     // 先检查云端是否有数据
@@ -4932,10 +4934,10 @@
                 });
                 
                 if (response.ok) {
-                    statusDiv.style.background = '#D1FAE5';
+        statusDiv.style.background = '#D1FAE5';
                     statusDiv.style.color = '#065F46';
                     statusDiv.textContent = '连接成功！数据库表已就绪';
-                    updateSyncStatus('connected');
+                    setTimeout(function() { updateSyncStatus('connected'); }, 100);
                 } else {
                     var error = await response.json();
                     if (error.code === '42P01' || error.message && error.message.includes('does not exist')) {
@@ -4958,6 +4960,7 @@
 
         // 更新同步状态UI
         function updateSyncStatus(status) {
+            console.log('更新同步状态:', status);
             syncStatus = status;
             var statusEl = document.getElementById('syncStatus');
             var lastSyncEl = document.getElementById('lastSyncTime');
@@ -5253,9 +5256,8 @@
         var originalSaveExam = saveExam;
         saveExam = function() {
             originalSaveExam();
-            // 更新本地最后修改时间
             localStorage.setItem('localDataLastUpdate', Date.now().toString());
-            if (autoSyncEnabled && supabase && syncStatus === 'connected') {
+            if (autoSyncEnabled && getSupabaseConfig() && syncStatus === 'connected') {
                 setTimeout(function() { syncToSupabase(); }, 500);
             }
         };
@@ -5264,9 +5266,8 @@
         var originalDeleteExam = deleteExam;
         deleteExam = function(examId) {
             originalDeleteExam(examId);
-            // 更新本地最后修改时间
             localStorage.setItem('localDataLastUpdate', Date.now().toString());
-            if (autoSyncEnabled && supabase && syncStatus === 'connected') {
+            if (autoSyncEnabled && getSupabaseConfig() && syncStatus === 'connected') {
                 setTimeout(function() { syncToSupabase(); }, 500);
             }
         };
