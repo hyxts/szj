@@ -4844,19 +4844,35 @@
         // 初始化Supabase客户端
         function initSupabase(url, key) {
             try {
-                // 确保URL格式正确（去掉/rest/v1/后缀）
                 var cleanUrl = url.replace(/\/rest\/v1\/?$/, '');
                 
-                if (window.supabase && window.supabase.createClient) {
-                    supabase = window.supabase.createClient(cleanUrl, key, {
+                // 尝试多种SDK加载方式
+                var createClientFunc = null;
+                
+                // 方式1: 直接从window对象
+                if (window.createClient) {
+                    createClientFunc = window.createClient;
+                }
+                // 方式2: 从supabase对象
+                else if (window.supabase && typeof window.supabase === 'function') {
+                    createClientFunc = window.supabase;
+                }
+                // 方式3: 从supabase.createClient
+                else if (window.supabase && window.supabase.createClient) {
+                    createClientFunc = window.supabase.createClient;
+                }
+                
+                if (createClientFunc) {
+                    supabase = createClientFunc(cleanUrl, key, {
                         auth: {
                             autoRefreshToken: false,
-                            persistSession: false
+                            persistSession: false,
+                            detectSessionInUrl: false
                         }
                     });
                     return supabase !== null;
                 }
-                console.error('Supabase SDK未加载');
+                console.error('Supabase SDK未加载或版本不兼容');
                 return false;
             } catch (e) {
                 console.error('初始化Supabase失败:', e);
