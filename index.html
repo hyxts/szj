@@ -715,13 +715,19 @@
 
         // Supabase 同步
         async function syncFromSupabase() {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000);
+
             try {
                 const response = await fetch(`${SUPABASE_CONFIG.url}/rest/v1/grade_data?id=eq.grade_data_single`, {
                     headers: {
                         'apikey': SUPABASE_CONFIG.key,
                         'Authorization': `Bearer ${SUPABASE_CONFIG.key}`
-                    }
+                    },
+                    signal: controller.signal
                 });
+
+                clearTimeout(timeoutId);
 
                 if (response.ok) {
                     const data = await response.json();
@@ -738,6 +744,7 @@
                 }
             } catch (e) {
                 console.log('同步失败:', e);
+                throw e;
             }
         }
 
@@ -751,11 +758,15 @@
                     updatedAt: new Date().toISOString()
                 };
 
+                const checkController = new AbortController();
+                setTimeout(() => checkController.abort(), 10000);
+
                 const checkResponse = await fetch(`${SUPABASE_CONFIG.url}/rest/v1/grade_data?id=eq.grade_data_single`, {
                     headers: {
                         'apikey': SUPABASE_CONFIG.key,
                         'Authorization': `Bearer ${SUPABASE_CONFIG.key}`
-                    }
+                    },
+                    signal: checkController.signal
                 });
 
                 const existing = await checkResponse.json();
@@ -763,6 +774,9 @@
                 const url = method === 'PATCH'
                     ? `${SUPABASE_CONFIG.url}/rest/v1/grade_data?id=eq.grade_data_single`
                     : `${SUPABASE_CONFIG.url}/rest/v1/grade_data`;
+
+                const uploadController = new AbortController();
+                setTimeout(() => uploadController.abort(), 10000);
 
                 const response = await fetch(url, {
                     method: method,
@@ -772,11 +786,14 @@
                         'Authorization': `Bearer ${SUPABASE_CONFIG.key}`,
                         'Prefer': 'return=representation'
                     },
-                    body: JSON.stringify(data)
+                    body: JSON.stringify(data),
+                    signal: uploadController.signal
                 });
 
                 if (response.ok) {
                     updateSyncStatus('connected', '已同步');
+                } else {
+                    updateSyncStatus('error', '同步失败');
                 }
             } catch (e) {
                 console.log('上传失败:', e);
@@ -795,8 +812,18 @@
         }
 
         function startAutoSync() {
-            setInterval(() => {
-                syncFromSupabase();
+            setInterval(async () => {
+                const statusText = document.getElementById('syncText');
+                if (statusText.textContent !== '同步中...') {
+                    updateSyncStatus('syncing', '同步中...');
+                    try {
+                        await syncFromSupabase();
+                        updateSyncStatus('connected', '已同步');
+                        renderAll();
+                    } catch (e) {
+                        updateSyncStatus('error', '同步失败');
+                    }
+                }
             }, 30000);
         }
 
