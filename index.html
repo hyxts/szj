@@ -1,11 +1,10 @@
-
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>成绩管理系统</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400,500,600,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400,500,600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <style>
         :root {
@@ -62,6 +61,10 @@
         .btn-danger {background:#EF4444;color:#fff;}
         .btn-small {padding:0.35rem 0.7rem;font-size:0.78rem;}
         .btn-group {display:flex;gap:0.4rem;}
+        .form-row {display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.5rem;}
+        .form-row .form-group {margin:0;flex:1;min-width:90px;}
+        .form-row label {font-size:0.75rem;margin-bottom:0.2rem;}
+        .form-row input {padding:0.4rem 0.5rem;font-size:0.8rem;}
         .form-grid {display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:0.9rem;margin-bottom:0.75rem;}
         .form-group {margin-bottom:0.25rem;}
         label {display:block;margin-bottom:0.4rem;font-size:0.8rem;font-weight:600;color:var(--text-secondary);}
@@ -136,8 +139,8 @@
                             <th>数学</th><th>数区排</th><th>数校排</th><th>数班排</th>
                             <th>英语</th><th>英区排</th><th>英校排</th><th>英班排</th>
                             <th>历史</th><th>历区排</th><th>历校排</th><th>历班排</th>
-                            <th>政治赋分</th><th>政区排</th><th>政校排</th><th>政班排</th>
-                            <th>地理赋分</th><th>地区排</th><th>地校排</th><th>地班排</th>
+                            <th>政治原</th><th>政治赋</th><th>政区排</th><th>政校排</th><th>政班排</th>
+                            <th>地理原</th><th>地理赋</th><th>地区排</th><th>地校排</th><th>地班排</th>
                             <th>总分</th><th>区排</th><th>校排</th><th>班排</th>
                             <th>操作</th>
                         </tr>
@@ -174,58 +177,60 @@
             </div>
 
             <h4 style="margin:1rem 0 0.5rem 0;">语文</h4>
-            <div class="form-grid">
-                <div class="form-group"><label>分数</label><input type="number" id="chinese" min="0"></div>
-                <div class="form-group"><label>区排名</label><input type="number" id="chineseRankDistrict" min="1"></div>
-                <div class="form-group"><label>校排名</label><input type="number" id="chineseRankSchool" min="1"></div>
-                <div class="form-group"><label>班排名</label><input type="number" id="chineseRankClass" min="1"></div>
+            <div class="form-row">
+                <div class="form-group"><label>分数</label><input type="number" step="0.5" min="0" id="chinese"></div>
+                <div class="form-group"><label>区排名</label><input type="number" min="1" id="chineseRankDistrict"></div>
+                <div class="form-group"><label>校排名</label><input type="number" min="1" id="chineseRankSchool"></div>
+                <div class="form-group"><label>班排名</label><input type="number" min="1" id="chineseRankClass"></div>
             </div>
 
             <h4 style="margin:1rem 0 0.5rem 0;">数学</h4>
-            <div class="form-grid">
-                <div class="form-group"><label>分数</label><input type="number" id="math" min="0"></div>
-                <div class="form-group"><label>区排名</label><input type="number" id="mathRankDistrict" min="1"></div>
-                <div class="form-group"><label>校排名</label><input type="number" id="mathRankSchool" min="1"></div>
-                <div class="form-group"><label>班排名</label><input type="number" id="mathRankClass" min="1"></div>
+            <div class="form-row">
+                <div class="form-group"><label>分数</label><input type="number" step="0.5" min="0" id="math"></div>
+                <div class="form-group"><label>区排名</label><input type="number" min="1" id="mathRankDistrict"></div>
+                <div class="form-group"><label>校排名</label><input type="number" min="1" id="mathRankSchool"></div>
+                <div class="form-group"><label>班排名</label><input type="number" min="1" id="mathRankClass"></div>
             </div>
 
             <h4 style="margin:1rem 0 0.5rem 0;">英语</h4>
-            <div class="form-grid">
-                <div class="form-group"><label>分数</label><input type="number" id="english" min="0"></div>
-                <div class="form-group"><label>区排名</label><input type="number" id="englishRankDistrict" min="1"></div>
-                <div class="form-group"><label>校排名</label><input type="number" id="englishRankSchool" min="1"></div>
-                <div class="form-group"><label>班排名</label><input type="number" id="englishRankClass" min="1"></div>
+            <div class="form-row">
+                <div class="form-group"><label>分数</label><input type="number" step="0.5" min="0" id="english"></div>
+                <div class="form-group"><label>区排名</label><input type="number" min="1" id="englishRankDistrict"></div>
+                <div class="form-group"><label>校排名</label><input type="number" min="1" id="englishRankSchool"></div>
+                <div class="form-group"><label>班排名</label><input type="number" min="1" id="englishRankClass"></div>
             </div>
 
             <h4 style="margin:1rem 0 0.5rem 0;">历史</h4>
-            <div class="form-grid">
-                <div class="form-group"><label>分数</label><input type="number" id="history" min="0"></div>
-                <div class="form-group"><label>区排名</label><input type="number" id="historyRankDistrict" min="1"></div>
-                <div class="form-group"><label>校排名</label><input type="number" id="historyRankSchool" min="1"></div>
-                <div class="form-group"><label>班排名</label><input type="number" id="historyRankClass" min="1"></div>
+            <div class="form-row">
+                <div class="form-group"><label>分数</label><input type="number" step="0.5" min="0" id="history"></div>
+                <div class="form-group"><label>区排名</label><input type="number" min="1" id="historyRankDistrict"></div>
+                <div class="form-group"><label>校排名</label><input type="number" min="1" id="historyRankSchool"></div>
+                <div class="form-group"><label>班排名</label><input type="number" min="1" id="historyRankClass"></div>
             </div>
 
-            <h4 style="margin:1rem 0 0.5rem 0;">政治赋分</h4>
-            <div class="form-grid">
-                <div class="form-group"><label>分数</label><input type="number" id="politicsScore" min="0"></div>
-                <div class="form-group"><label>区排名</label><input type="number" id="politicsRankDistrict" min="1"></div>
-                <div class="form-group"><label>校排名</label><input type="number" id="politicsRankSchool" min="1"></div>
-                <div class="form-group"><label>班排名</label><input type="number" id="politicsRankClass" min="1"></div>
+            <h4 style="margin:1rem 0 0.5rem 0;">政治</h4>
+            <div class="form-row">
+                <div class="form-group"><label>原始分</label><input type="number" step="0.5" min="0" id="politicsRaw"></div>
+                <div class="form-group"><label>赋分</label><input type="number" step="0.5" min="0" id="politicsScore"></div>
+                <div class="form-group"><label>区排名</label><input type="number" min="1" id="politicsRankDistrict"></div>
+                <div class="form-group"><label>校排名</label><input type="number" min="1" id="politicsRankSchool"></div>
+                <div class="form-group"><label>班排名</label><input type="number" min="1" id="politicsRankClass"></div>
             </div>
 
-            <h4 style="margin:1rem 0 0.5rem 0;">地理赋分</h4>
-            <div class="form-grid">
-                <div class="form-group"><label>分数</label><input type="number" id="geographyScore" min="0"></div>
-                <div class="form-group"><label>区排名</label><input type="number" id="geographyRankDistrict" min="1"></div>
-                <div class="form-group"><label>校排名</label><input type="number" id="geographyRankSchool" min="1"></div>
-                <div class="form-group"><label>班排名</label><input type="number" id="geographyRankClass" min="1"></div>
+            <h4 style="margin:1rem 0 0.5rem 0;">地理</h4>
+            <div class="form-row">
+                <div class="form-group"><label>原始分</label><input type="number" step="0.5" min="0" id="geographyRaw"></div>
+                <div class="form-group"><label>赋分</label><input type="number" step="0.5" min="0" id="geographyScore"></div>
+                <div class="form-group"><label>区排名</label><input type="number" min="1" id="geographyRankDistrict"></div>
+                <div class="form-group"><label>校排名</label><input type="number" min="1" id="geographyRankSchool"></div>
+                <div class="form-group"><label>班排名</label><input type="number" min="1" id="geographyRankClass"></div>
             </div>
 
             <h4 style="margin:1rem 0 0.5rem 0;">总分排名</h4>
-            <div class="form-grid">
-                <div class="form-group"><label>区排名</label><input type="number" id="totalRankDistrict" min="1"></div>
-                <div class="form-group"><label>校排名</label><input type="number" id="totalRankSchool" min="1"></div>
-                <div class="form-group"><label>班排名</label><input type="number" id="totalRankClass" min="1"></div>
+            <div class="form-row">
+                <div class="form-group"><label>区排名</label><input type="number" min="1" id="totalRankDistrict"></div>
+                <div class="form-group"><label>校排名</label><input type="number" min="1" id="totalRankSchool"></div>
+                <div class="form-group"><label>班排名</label><input type="number" min="1" id="totalRankClass"></div>
             </div>
 
             <div class="btn-group" style="justify-content:flex-end;margin-top:1rem;">
@@ -242,12 +247,11 @@ const SUBJECT_NAMES = {chinese:'语文',math:'数学',english:'英语',history:'
 let exams = [];
 let charts = {};
 
-// 默认数据
 const DEFAULT_DATA = [
 {
   date: "2025-05-14",
   name: "阶段性检测",
-  scores: { chinese: 93, math: 114, english: 108.5, history: 91, politicsScore: 94, geographyScore: 91 },
+  scores: { chinese: 93, math: 114, english: 108.5, history: 91, politicsRaw: 0, politicsScore: 94, geographyRaw: 0, geographyScore: 91 },
   ranks: {
     chinese: { district: 101, school: 14, class: 3 },
     math: { district: 122, school: 17, class: 5 },
@@ -262,11 +266,26 @@ const DEFAULT_DATA = [
 }
 ];
 
-function showToast(m,t){const c=document.getElementById('toastContainer');const d=document.createElement('div');d.className=`toast ${t}`;d.textContent=m;c.appendChild(d);setTimeout(()=>d.remove(),3000);}
+function showToast(msg, type){
+    const container = document.getElementById('toastContainer');
+    const el = document.createElement('div');
+    el.className = `toast ${type}`;
+    el.textContent = msg;
+    container.appendChild(el);
+    setTimeout(()=>el.remove(), 3000);
+}
 function safeNum(v){const n=parseFloat(v);return isNaN(n)?0:n;}
 
-function openAddModal(){document.getElementById('modalTitle').textContent='添加成绩';document.getElementById('gradeForm').reset();document.getElementById('editId').value='';document.getElementById('examDate').valueAsDate=new Date();document.getElementById('modal').classList.add('active');}
-function closeModal(){document.getElementById('modal').classList.remove('active');}
+function openAddModal(){
+    document.getElementById('modalTitle').textContent='添加成绩';
+    document.getElementById('gradeForm').reset();
+    document.getElementById('editId').value='';
+    document.getElementById('examDate').valueAsDate=new Date();
+    document.getElementById('modal').classList.add('active');
+}
+function closeModal(){
+    document.getElementById('modal').classList.remove('active');
+}
 
 function saveGrade(e){
     e.preventDefault();
@@ -277,7 +296,9 @@ function saveGrade(e){
         math: safeNum(document.getElementById('math').value),
         english: safeNum(document.getElementById('english').value),
         history: safeNum(document.getElementById('history').value),
+        politicsRaw: safeNum(document.getElementById('politicsRaw').value),
         politicsScore: safeNum(document.getElementById('politicsScore').value),
+        geographyRaw: safeNum(document.getElementById('geographyRaw').value),
         geographyScore: safeNum(document.getElementById('geographyScore').value)
     };
 
@@ -308,101 +329,159 @@ function saveGrade(e){
         total
     };
 
-    const i = exams.findIndex(x => x.id === id);
-    if(i >= 0) exams[i] = data;
+    const idx = exams.findIndex(x => x.id === id);
+    if(idx >= 0) exams[idx] = data;
     else exams.push(data);
 
     localStorage.setItem('gradeData', JSON.stringify({ exams }));
     renderAll();
     closeModal();
-    showToast(i >= 0 ? '已更新' : '已添加', 'success');
+    showToast(idx >= 0 ? '已更新' : '已添加', 'success');
 }
 
 function openEditModal(id){
-    const e=exams.find(x=>x.id===id);if(!e)return;
+    const item = exams.find(x=>x.id===id);
+    if(!item)return;
     document.getElementById('modalTitle').textContent='编辑成绩';
     document.getElementById('editId').value=id;
-    document.getElementById('examDate').value=e.date;
-    document.getElementById('examName').value=e.name;
-    document.getElementById('chinese').value=e.scores.chinese;
-    document.getElementById('math').value=e.scores.math;
-    document.getElementById('english').value=e.scores.english;
-    document.getElementById('history').value=e.scores.history;
-    document.getElementById('politicsScore').value=e.scores.politicsScore;
-    document.getElementById('geographyScore').value=e.scores.geographyScore;
-    document.getElementById('chineseRankDistrict').value=e.ranks.chinese.district;
-    document.getElementById('chineseRankSchool').value=e.ranks.chinese.school;
-    document.getElementById('chineseRankClass').value=e.ranks.chinese.class;
-    document.getElementById('mathRankDistrict').value=e.ranks.math.district;
-    document.getElementById('mathRankSchool').value=e.ranks.math.school;
-    document.getElementById('mathRankClass').value=e.ranks.math.class;
-    document.getElementById('englishRankDistrict').value=e.ranks.english.district;
-    document.getElementById('englishRankSchool').value=e.ranks.english.school;
-    document.getElementById('englishRankClass').value=e.ranks.english.class;
-    document.getElementById('historyRankDistrict').value=e.ranks.history.district;
-    document.getElementById('historyRankSchool').value=e.ranks.history.school;
-    document.getElementById('historyRankClass').value=e.ranks.history.class;
-    document.getElementById('politicsRankDistrict').value=e.ranks.politicsScore.district;
-    document.getElementById('politicsRankSchool').value=e.ranks.politicsScore.school;
-    document.getElementById('politicsRankClass').value=e.ranks.politicsScore.class;
-    document.getElementById('geographyRankDistrict').value=e.ranks.geographyScore.district;
-    document.getElementById('geographyRankSchool').value=e.ranks.geographyScore.school;
-    document.getElementById('geographyRankClass').value=e.ranks.geographyScore.class;
-    document.getElementById('totalRankDistrict').value=e.totalRank.district;
-    document.getElementById('totalRankSchool').value=e.totalRank.school;
-    document.getElementById('totalRankClass').value=e.totalRank.class;
+    document.getElementById('examDate').value=item.date;
+    document.getElementById('examName').value=item.name;
+    document.getElementById('chinese').value=item.scores.chinese;
+    document.getElementById('math').value=item.scores.math;
+    document.getElementById('english').value=item.scores.english;
+    document.getElementById('history').value=item.scores.history;
+    document.getElementById('politicsRaw').value=item.scores.politicsRaw;
+    document.getElementById('politicsScore').value=item.scores.politicsScore;
+    document.getElementById('geographyRaw').value=item.scores.geographyRaw;
+    document.getElementById('geographyScore').value=item.scores.geographyScore;
+    document.getElementById('chineseRankDistrict').value=item.ranks.chinese.district;
+    document.getElementById('chineseRankSchool').value=item.ranks.chinese.school;
+    document.getElementById('chineseRankClass').value=item.ranks.chinese.class;
+    document.getElementById('mathRankDistrict').value=item.ranks.math.district;
+    document.getElementById('mathRankSchool').value=item.ranks.math.school;
+    document.getElementById('mathRankClass').value=item.ranks.math.class;
+    document.getElementById('englishRankDistrict').value=item.ranks.english.district;
+    document.getElementById('englishRankSchool').value=item.ranks.english.school;
+    document.getElementById('englishRankClass').value=item.ranks.english.class;
+    document.getElementById('historyRankDistrict').value=item.ranks.history.district;
+    document.getElementById('historyRankSchool').value=item.ranks.history.school;
+    document.getElementById('historyRankClass').value=item.ranks.history.class;
+    document.getElementById('politicsRankDistrict').value=item.ranks.politicsScore.district;
+    document.getElementById('politicsRankSchool').value=item.ranks.politicsScore.school;
+    document.getElementById('politicsRankClass').value=item.ranks.politicsScore.class;
+    document.getElementById('geographyRankDistrict').value=item.ranks.geographyScore.district;
+    document.getElementById('geographyRankSchool').value=item.ranks.geographyScore.school;
+    document.getElementById('geographyRankClass').value=item.ranks.geographyScore.class;
+    document.getElementById('totalRankDistrict').value=item.totalRank.district;
+    document.getElementById('totalRankSchool').value=item.totalRank.school;
+    document.getElementById('totalRankClass').value=item.totalRank.class;
     document.getElementById('modal').classList.add('active');
 }
 
-function deleteGrade(id){if(!confirm('确定删除？'))return;exams=exams.filter(x=>x.id!==id);localStorage.setItem('gradeData',JSON.stringify({exams}));renderAll();showToast('已删除','info');}
+function deleteGrade(id){
+    if(!confirm('确定删除？'))return;
+    exams=exams.filter(x=>x.id!==id);
+    localStorage.setItem('gradeData',JSON.stringify({exams}));
+    renderAll();
+    showToast('已删除','info');
+}
 
 function renderAll(){renderDashboard();renderGrades();renderStats();renderCharts();}
 function renderDashboard(){
-    const s=[...exams].sort((a,b)=>new Date(b.date)-new Date(a.date));
+    const list=[...exams].sort((a,b)=>new Date(b.date)-new Date(a.date));
     document.getElementById('totalExams').textContent=exams.length;
-    if(s.length){const l=s[0];const a=(s.reduce((t,c)=>t+(c.total||0),0)/s.length).toFixed(1);document.getElementById('avgScore').textContent=a;document.getElementById('latestExam').textContent=l.name;document.getElementById('latestRank').textContent=`#${l.totalRank.district}`;}
-    else{document.getElementById('avgScore').textContent='-';document.getElementById('latestExam').textContent='-';document.getElementById('latestRank').textContent='-';}
-    const b=document.querySelector('#dashboard tbody');const e=document.getElementById('emptyRecent');if(!s.length){b.innerHTML='';e.style.display='block';return;}e.style.display='none';
-    b.innerHTML=s.slice(0,5).map(x=>`<tr><td>${x.date}</td><td>${x.name}</td><td>${x.total}</td><td>#${x.totalRank.district}</td><td>#${x.totalRank.school}</td><td>#${x.totalRank.class}</td></tr>`).join('');
+    if(list.length){
+        const last=list[0];
+        const avg=(list.reduce((t,c)=>t+(c.total||0),0)/list.length).toFixed(1);
+        document.getElementById('avgScore').textContent=avg;
+        document.getElementById('latestExam').textContent=last.name;
+        document.getElementById('latestRank').textContent=`#${last.totalRank.district}`;
+    }else{
+        document.getElementById('avgScore').textContent='-';
+        document.getElementById('latestExam').textContent='-';
+        document.getElementById('latestRank').textContent='-';
+    }
+    const tb=document.querySelector('#dashboard tbody');
+    const empty=document.getElementById('emptyRecent');
+    if(!list.length){tb.innerHTML='';empty.style.display='block';return;}
+    empty.style.display='none';
+    tb.innerHTML=list.slice(0,5).map(x=>`<tr><td>${x.date}</td><td>${x.name}</td><td>${x.total}</td><td>#${x.totalRank.district}</td><td>#${x.totalRank.school}</td><td>#${x.totalRank.class}</td></tr>`).join('');
 }
 function renderGrades(){
-    const s=[...exams].sort((a,b)=>new Date(b.date)-new Date(a.date));
-    const b=document.querySelector('#gradesTable tbody');const e=document.getElementById('emptyGrades');if(!s.length){b.innerHTML='';e.style.display='block';return;}e.style.display='none';
-    b.innerHTML=s.map(x=>`<tr>
+    const list=[...exams].sort((a,b)=>new Date(b.date)-new Date(a.date));
+    const tb=document.querySelector('#grades tbody');
+    const empty=document.getElementById('emptyGrades');
+    if(!list.length){tb.innerHTML='';empty.style.display='block';return;}
+    empty.style.display='none';
+    tb.innerHTML=list.map(x=>`<tr>
         <td>${x.date || '-'}</td><td>${x.name}</td>
         <td>${x.scores.chinese || '-'}</td><td>${x.ranks.chinese.district ? '#'+x.ranks.chinese.district : '-'}</td><td>${x.ranks.chinese.school ? '#'+x.ranks.chinese.school : '-'}</td><td>${x.ranks.chinese.class ? '#'+x.ranks.chinese.class : '-'}</td>
         <td>${x.scores.math || '-'}</td><td>${x.ranks.math.district ? '#'+x.ranks.math.district : '-'}</td><td>${x.ranks.math.school ? '#'+x.ranks.math.school : '-'}</td><td>${x.ranks.math.class ? '#'+x.ranks.math.class : '-'}</td>
         <td>${x.scores.english || '-'}</td><td>${x.ranks.english.district ? '#'+x.ranks.english.district : '-'}</td><td>${x.ranks.english.school ? '#'+x.ranks.english.school : '-'}</td><td>${x.ranks.english.class ? '#'+x.ranks.english.class : '-'}</td>
         <td>${x.scores.history || '-'}</td><td>${x.ranks.history.district ? '#'+x.ranks.history.district : '-'}</td><td>${x.ranks.history.school ? '#'+x.ranks.history.school : '-'}</td><td>${x.ranks.history.class ? '#'+x.ranks.history.class : '-'}</td>
-        <td>${x.scores.politicsScore || '-'}</td><td>${x.ranks.politicsScore.district ? '#'+x.ranks.politicsScore.district : '-'}</td><td>${x.ranks.politicsScore.school ? '#'+x.ranks.politicsScore.school : '-'}</td><td>${x.ranks.politicsScore.class ? '#'+x.ranks.politicsScore.class : '-'}</td>
-        <td>${x.scores.geographyScore || '-'}</td><td>${x.ranks.geographyScore.district ? '#'+x.ranks.geographyScore.district : '-'}</td><td>${x.ranks.geographyScore.school ? '#'+x.ranks.geographyScore.school : '-'}</td><td>${x.ranks.geographyScore.class ? '#'+x.ranks.geographyScore.class : '-'}</td>
+        <td>${x.scores.politicsRaw || '-'}</td><td>${x.scores.politicsScore || '-'}</td><td>${x.ranks.politicsScore.district ? '#'+x.ranks.politicsScore.district : '-'}</td><td>${x.ranks.politicsScore.school ? '#'+x.ranks.politicsScore.school : '-'}</td><td>${x.ranks.politicsScore.class ? '#'+x.ranks.politicsScore.class : '-'}</td>
+        <td>${x.scores.geographyRaw || '-'}</td><td>${x.scores.geographyScore || '-'}</td><td>${x.ranks.geographyScore.district ? '#'+x.ranks.geographyScore.district : '-'}</td><td>${x.ranks.geographyScore.school ? '#'+x.ranks.geographyScore.school : '-'}</td><td>${x.ranks.geographyScore.class ? '#'+x.ranks.geographyScore.class : '-'}</td>
         <td><strong>${x.total || 0}</strong></td>
         <td>${x.totalRank.district ? '#'+x.totalRank.district : '-'}</td><td>${x.totalRank.school ? '#'+x.totalRank.school : '-'}</td><td>${x.totalRank.class ? '#'+x.totalRank.class : '-'}</td>
         <td><div class="btn-group"><button class="btn btn-secondary btn-small" onclick="openEditModal('${x.id}')">编辑</button><button class="btn btn-danger btn-small" onclick="deleteGrade('${x.id}')">删除</button></div></td>
     </tr>`).join('');
 }
 function renderStats(){
-    const b=document.querySelector('#statsTable tbody');const e=document.getElementById('emptyStats');if(!exams.length){b.innerHTML='';e.style.display='block';return;}e.style.display='none';
-    const st=SUBJECTS.map(sub=>{const sc=exams.map(x=>x.scores[sub]).filter(x=>x>0);if(!sc.length)return{n:SUBJECT_NAMES[sub],a:'-',m:'-',mi:'-',c:0};const a=(sc.reduce((p,c)=>p+c,0)/sc.length).toFixed(1);const m=Math.max(...sc);const mi=Math.min(...sc);return{n:SUBJECT_NAMES[sub],a,m,mi,c:sc.length};});
-    b.innerHTML=st.map(x=>`<tr><td><strong>${x.n}</strong></td><td>${x.a}</td><td>${x.m}</td><td>${x.mi}</td><td>${x.c}</td></tr>`).join('');
+    const tb=document.querySelector('#statsTable tbody');
+    const empty=document.getElementById('emptyStats');
+    if(!exams.length){tb.innerHTML='';empty.style.display='block';return;}
+    empty.style.display='none';
+    const st=SUBJECTS.map(sub=>{
+        const sc=exams.map(x=>x.scores[sub]).filter(x=>x>0);
+        if(!sc.length)return{n:SUBJECT_NAMES[sub],a:'-',m:'-',mi:'-',c:0};
+        const a=(sc.reduce((p,c)=>p+c,0)/sc.length).toFixed(1);
+        const m=Math.max(...sc);
+        const mi=Math.min(...sc);
+        return{n:SUBJECT_NAMES[sub],a,m,mi,c:sc.length};
+    });
+    tb.innerHTML=st.map(x=>`<tr><td><strong>${x.n}</strong></td><td>${x.a}</td><td>${x.m}</td><td>${x.mi}</td><td>${x.c}</td></tr>`).join('');
 }
-function renderCharts(){Object.values(charts).forEach(c=>c?.destroy());charts={};const s=[...exams].sort((a,b)=>new Date(a.date)-new Date(b.date));if(!s.length)return;
-const t=document.getElementById('trendChart')?.getContext('2d');if(t)charts.trend=new Chart(t,{type:'line',data:{labels:s.map(x=>x.name),datasets:[{data:s.map(x=>x.total),borderColor:'#2563EB',backgroundColor:'rgba(37,99,235,0.08)',fill:true}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}});
-const l=s.at(-1);const c=document.getElementById('subjectChart')?.getContext('2d');if(c)charts.subject=new Chart(c,{type:'bar',data:{labels:SUBJECTS.map(x=>SUBJECT_NAMES[x]),datasets:[{data:SUBJECTS.map(x=>l.scores[x]),backgroundColor:['#EF4444','#F59E0B','#10B981','#3B82F6','#8B5CF6','#06B6D4']}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}});
-const st=document.getElementById('subjectTrendChart')?.getContext('2d');if(st)charts.subjectTrend=new Chart(st,{type:'line',data:{labels:s.map(x=>x.name),datasets:SUBJECTS.map((x,i)=>({label:SUBJECT_NAMES[x],data:s.map(d=>d.scores[x]),borderColor:['#EF4444','#F59E0B','#10B981','#3B82F6','#8B5CF6','#06B6D4'][i],backgroundColor:'transparent'}))},options:{responsive:true,maintainAspectRatio:false}});
-const d=document.getElementById('distributionChart')?.getContext('2d');if(d)charts.distribution=new Chart(d,{type:'bar',data:{labels:s.map(x=>x.name),datasets:[{data:s.map(x=>x.total),backgroundColor:'rgba(37,99,235,0.6)'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}});
+function renderCharts(){
+    Object.values(charts).forEach(c=>c?.destroy());
+    charts={};
+    const list=[...exams].sort((a,b)=>new Date(a.date)-new Date(b.date));
+    if(!list.length)return;
+    const t=document.getElementById('trendChart')?.getContext('2d');
+    if(t)charts.trend=new Chart(t,{type:'line',data:{labels:list.map(x=>x.name),datasets:[{data:list.map(x=>x.total),borderColor:'#2563EB',backgroundColor:'rgba(37,99,235,0.08)',fill:true}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}});
+    const last=list.at(-1);
+    const c=document.getElementById('subjectChart')?.getContext('2d');
+    if(c)charts.subject=new Chart(c,{type:'bar',data:{labels:SUBJECTS.map(x=>SUBJECT_NAMES[x]),datasets:[{data:SUBJECTS.map(x=>last.scores[x]),backgroundColor:['#EF4444','#F59E0B','#10B981','#3B82F6','#8B5CF6','#06B6D4']}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}});
+    const st=document.getElementById('subjectTrendChart')?.getContext('2d');
+    if(st)charts.subjectTrend=new Chart(st,{type:'line',data:{labels:list.map(x=>x.name),datasets:SUBJECTS.map((x,i)=>({label:SUBJECT_NAMES[x],data:list.map(d=>d.scores[x]),borderColor:['#EF4444','#F59E0B','#10B981','#3B82F6','#8B5CF6','#06B6D4'][i],backgroundColor:'transparent'}))},options:{responsive:true,maintainAspectRatio:false}});
+    const d=document.getElementById('distributionChart')?.getContext('2d');
+    if(d)charts.distribution=new Chart(d,{type:'bar',data:{labels:list.map(x=>x.name),datasets:[{data:list.map(x=>x.total),backgroundColor:'rgba(37,99,235,0.6)'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}});
 }
 
 document.addEventListener('DOMContentLoaded',()=>{
-    const d=localStorage.getItem('gradeData');
-    if(d){try{exams=JSON.parse(d).exams||[];}catch{exams=DEFAULT_DATA;}}
-    else exams = DEFAULT_DATA;
+    let data = localStorage.getItem('gradeData');
+    if(data){
+        try{exams=JSON.parse(data).exams||[];}catch{exams=DEFAULT_DATA;}
+    }else{
+        exams = DEFAULT_DATA;
+    }
     localStorage.setItem('gradeData',JSON.stringify({exams}));
-    document.querySelectorAll('.nav-btn').forEach(n=>{n.addEventListener('click',()=>{document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));n.classList.add('active');document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(n.dataset.page).classList.add('active');setTimeout(renderCharts,100);});});
+    document.querySelectorAll('.nav-btn').forEach(n=>{
+        n.addEventListener('click',()=>{
+            document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));
+            n.classList.add('active');
+            document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+            document.getElementById(n.dataset.page).classList.add('active');
+            setTimeout(renderCharts,100);
+        });
+    });
     renderAll();
 });
 
-window.openAddModal=openAddModal;window.closeModal=closeModal;window.saveGrade=saveGrade;window.openEditModal=openEditModal;window.deleteGrade=deleteGrade;
+window.openAddModal=openAddModal;
+window.closeModal=closeModal;
+window.saveGrade=saveGrade;
+window.openEditModal=openEditModal;
+window.deleteGrade=deleteGrade;
 </script>
 </body>
 </html>
