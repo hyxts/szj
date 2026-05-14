@@ -29,6 +29,7 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g1' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%232563EB'/%3E%3Cstop offset='100%25' stop-color='%2310B981'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='20' fill='url(%23g1)'/%3E%3Cpath d='M25 70 L25 40 L40 55 L55 35 L70 50 L85 25' stroke='white' stroke-width='6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='25' cy='40' r='6' fill='%23F59E0B'/%3E%3Ccircle cx='40' cy='55' r='6' fill='%23EF4444'/%3E%3Ccircle cx='55' cy='35' r='6' fill='%238B5CF6'/%3E%3Ccircle cx='70' cy='50' r='6' fill='%2306B6D4'/%3E%3Ccircle cx='85' cy='25' r='6' fill='%23F59E0B'/%3E%3C/svg%3E">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --primary: #2563EB;
@@ -1601,6 +1602,7 @@
                     <div class="sub-nav">
                         <button class="sub-nav-btn active" data-submodule="backup">备份管理</button>
                         <button class="sub-nav-btn" data-submodule="student">学生信息</button>
+                        <button class="sub-nav-btn" data-submodule="sync">多端同步</button>
                     </div>
                 </div>
 
@@ -1812,6 +1814,88 @@
                     </div>
                 </div>
                 </div> <!-- 关闭学生信息子模块 -->
+
+                <!-- 多端同步子模块 -->
+                <div id="settings-sync" class="settings-submodule">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">多端同步设置</h2>
+                    </div>
+                    <div style="padding: 1.5rem;">
+                        <!-- Supabase 配置 -->
+                        <div class="card" style="padding: 1.25rem; margin-bottom: 1.5rem; background: var(--bg-light);">
+                            <h3 style="font-size: 1rem; margin-bottom: 1rem;">Supabase 连接配置 - 孙梓婧成绩管理</h3>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>项目 URL</label>
+                                    <input type="text" id="supabaseUrl" placeholder="https://your-project.supabase.co" value="https://ogfzjjlzxpxosnyxjxci.supabase.co">
+                                </div>
+                                <div class="form-group">
+                                    <label>API Key (anon/public)</label>
+                                    <input type="password" id="supabaseKey" placeholder="输入您的Supabase anon key" value="sb_publishable_WvalsHmw093vcsHkKMIU5w_0ozf0XOE">
+                                </div>
+                            </div>
+                            <div style="margin-top: 1rem;">
+                                <button class="btn btn-primary" onclick="testSupabaseConnection()">测试连接</button>
+                                <button class="btn btn-outline" onclick="saveSupabaseConfig()">保存配置</button>
+                            </div>
+                            <div id="supabaseConnectionStatus" style="margin-top: 1rem; padding: 0.75rem; border-radius: var(--radius); display: none;"></div>
+                        </div>
+
+                        <!-- 同步状态 -->
+                        <div class="card" style="padding: 1.25rem; margin-bottom: 1.5rem;">
+                            <h3 style="font-size: 1rem; margin-bottom: 1rem;">同步状态</h3>
+                            <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                                <div class="stat-card">
+                                    <div class="stat-value" id="syncStatus">未连接</div>
+                                    <div class="stat-label">同步状态</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-value" id="lastSyncTime">-</div>
+                                    <div>上次同步</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 同步操作 -->
+                        <div style="margin-bottom: 1.5rem;">
+                            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                                <button class="btn btn-success" onclick="syncToSupabase()">
+                                    <span style="display: inline-flex; align-items: center; gap: 0.5rem;">
+                                        上传数据到云端
+                                    </span>
+                                </button>
+                                <button class="btn btn-primary" onclick="syncFromSupabase()">
+                                    <span style="display: inline-flex; align-items: center; gap: 0.5rem;">
+                                        从云端下载数据
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 自动同步设置 -->
+                        <div style="margin-top: 1.5rem;">
+                            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                    <input type="checkbox" id="autoSyncToggle" onchange="toggleAutoSync()">
+                                    <span>启用自动同步</span>
+                                </label>
+                            </div>
+                            <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
+                                <div style="flex: 1; min-width: 200px;">
+                                    <label style="display: block; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem;">同步间隔</label>
+                                    <select id="syncInterval" onchange="changeSyncInterval()">
+                                        <option value="30000">30秒</option>
+                                        <option value="60000" selected>1分钟</option>
+                                        <option value="300000">5分钟</option>
+                                        <option value="600000">10分钟</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </div> <!-- 关闭多端同步子模块 -->
             </section>
 
             <!-- 高考倒计时模块 -->
@@ -2085,6 +2169,14 @@
         var DB_VERSION = 2;                // 数据库版本
         var dbStatus = 'checking';         // 数据库状态：checking/connected/local/error
         var dbExamCount = 0;               // 数据库中的考试记录数
+
+        // Supabase同步相关变量
+        var supabase = null;               // Supabase客户端实例
+        var syncStatus = 'disconnected';   // 同步状态：disconnected/connecting/connected/error
+        var autoSyncEnabled = false;       // 自动同步开关
+        var autoSyncTimer = null;          // 自动同步定时器
+        var syncInterval = 60000;          // 自动同步间隔（默认1分钟）
+        var lastSyncTime = null;           // 上次同步时间
 
         // ================================================
         // IndexedDB数据库模块
@@ -4746,8 +4838,430 @@
         }
 
         // ================================================
+        // Supabase同步模块
+        // ================================================
+
+        // 初始化Supabase客户端
+        function initSupabase(url, key) {
+            try {
+                // 确保URL格式正确（去掉/rest/v1/后缀）
+                var cleanUrl = url.replace(/\/rest\/v1\/?$/, '');
+                
+                if (window.supabase && window.supabase.createClient) {
+                    supabase = window.supabase.createClient(cleanUrl, key, {
+                        auth: {
+                            autoRefreshToken: false,
+                            persistSession: false
+                        }
+                    });
+                    return supabase !== null;
+                }
+                console.error('Supabase SDK未加载');
+                return false;
+            } catch (e) {
+                console.error('初始化Supabase失败:', e);
+                return false;
+            }
+        }
+
+        // 保存Supabase配置
+        function saveSupabaseConfig() {
+            var url = document.getElementById('supabaseUrl').value.trim();
+            var key = document.getElementById('supabaseKey').value.trim();
+            
+            if (!url || !key) {
+                showToast('请填写完整的Supabase配置', 'error');
+                return;
+            }
+
+            // 清理URL格式
+            var cleanUrl = url.replace(/\/rest\/v1\/?$/, '');
+            
+            if (isLocalStorageAvailable()) {
+                localStorage.setItem('supabaseConfig', JSON.stringify({ url: cleanUrl, key: key }));
+            }
+
+            if (initSupabase(cleanUrl, key)) {
+                testSupabaseConnection();
+                showToast('Supabase配置已保存', 'success');
+            } else {
+                showToast('配置保存失败，请检查参数', 'error');
+            }
+        }
+
+        // 加载Supabase配置
+        function loadSupabaseConfig() {
+            if (!isLocalStorageAvailable()) return;
+            try {
+                var config = localStorage.getItem('supabaseConfig');
+                if (config) {
+                    var parsed = JSON.parse(config);
+                    var urlInput = document.getElementById('supabaseUrl');
+                    var keyInput = document.getElementById('supabaseKey');
+                    if (urlInput) urlInput.value = parsed.url || '';
+                    if (keyInput) keyInput.value = parsed.key || '';
+                    if (parsed.url && parsed.key) {
+                        var cleanUrl = parsed.url.replace(/\/rest\/v1\/?$/, '');
+                        initSupabase(cleanUrl, parsed.key);
+                    }
+                } else {
+                    // 如果没有保存的配置，使用页面上预填的值初始化
+                    var url = document.getElementById('supabaseUrl').value;
+                    var key = document.getElementById('supabaseKey').value;
+                    if (url && key && url !== 'https://your-project.supabase.co') {
+                        initSupabase(url, key);
+                    }
+                }
+            } catch (e) {
+                console.error('加载Supabase配置失败:', e);
+            }
+        }
+
+        // 测试Supabase连接
+        async function testSupabaseConnection() {
+            var statusDiv = document.getElementById('supabaseConnectionStatus');
+            if (!statusDiv) return;
+            
+            statusDiv.style.display = 'block';
+            statusDiv.style.background = '#FFFBEB';
+            statusDiv.style.color = '#92400E';
+            statusDiv.textContent = '正在连接...';
+            
+            try {
+                if (!supabase) {
+                    var url = document.getElementById('supabaseUrl').value.trim();
+                    var key = document.getElementById('supabaseKey').value.trim();
+                    if (!initSupabase(url, key)) {
+                        throw new Error('初始化Supabase客户端失败');
+                    }
+                }
+                
+                // 尝试查询表
+                var { data, error } = await supabase.from('grade_data').select('id').limit(1);
+                
+                if (error) {
+                    if (error.code === '42P01' || error.code === 'PGRST116' || error.message && error.message.includes('does not exist')) {
+                        // 表不存在，提示用户需要在Supabase创建表
+                        statusDiv.style.background = '#FEF3C7';
+                        statusDiv.style.color = '#92400E';
+                        statusDiv.innerHTML = '连接成功！<br><small>请在Supabase SQL编辑器中创建数据表</small>';
+                        updateSyncStatus('connected');
+                    } else {
+                        throw error;
+                    }
+                } else {
+                    statusDiv.style.background = '#D1FAE5';
+                    statusDiv.style.color = '#065F46';
+                    statusDiv.textContent = '连接成功！数据库表已就绪';
+                    updateSyncStatus('connected');
+                }
+            } catch (e) {
+                console.error('连接失败:', e);
+                statusDiv.style.background = '#FEE2E2';
+                statusDiv.style.color = '#991B1B';
+                statusDiv.textContent = '连接失败: ' + (e.message || '未知错误');
+                updateSyncStatus('error');
+            }
+        }
+
+        // 更新同步状态UI
+        function updateSyncStatus(status) {
+            syncStatus = status;
+            var statusEl = document.getElementById('syncStatus');
+            var lastSyncEl = document.getElementById('lastSyncTime');
+            
+            if (statusEl) {
+                switch (status) {
+                    case 'connected':
+                        statusEl.textContent = '已连接';
+                        statusEl.parentElement.classList.remove('highlight-red', 'highlight-yellow');
+                        statusEl.parentElement.classList.add('highlight-green');
+                        break;
+                    case 'connecting':
+                        statusEl.textContent = '连接中';
+                        statusEl.parentElement.classList.remove('highlight-green', 'highlight-red');
+                        statusEl.parentElement.classList.add('highlight-yellow');
+                        break;
+                    case 'error':
+                        statusEl.textContent = '连接错误';
+                        statusEl.parentElement.classList.remove('highlight-green', 'highlight-yellow');
+                        statusEl.parentElement.classList.add('highlight-red');
+                        break;
+                    default:
+                        statusEl.textContent = '未连接';
+                        statusEl.parentElement.classList.remove('highlight-green', 'highlight-yellow', 'highlight-red');
+                }
+            }
+            
+            if (lastSyncEl && lastSyncTime) {
+                lastSyncEl.textContent = new Date(lastSyncTime).toLocaleString('zh-CN');
+            }
+        }
+
+        // 同步数据到Supabase
+        async function syncToSupabase() {
+            if (!supabase) {
+                showToast('请先配置Supabase', 'error');
+                return;
+            }
+            
+            try {
+                showToast('正在上传数据...', 'info');
+                
+                var studentSettings = null;
+                try {
+                    studentSettings = await getStudentSettingsFromDB();
+                } catch (e) {
+                    studentSettings = null;
+                }
+                
+                var benchmarkSettings = null;
+                try {
+                    benchmarkSettings = await getBenchmarkSettingsFromDB();
+                } catch (e) {
+                    benchmarkSettings = null;
+                }
+                
+                var now = new Date();
+                var dataToSync = {
+                    id: 'grade_data_single',
+                    exams: exams,
+                    studentSettings: studentSettings,
+                    benchmarkSettings: benchmarkSettings,
+                    customBenchmarks: customBenchmarks,
+                    updatedAt: now.toISOString()
+                };
+                
+                var { error } = await supabase.from('grade_data').upsert(dataToSync);
+                
+                if (error) throw error;
+                
+                // 更新本地最后修改时间
+                localStorage.setItem('localDataLastUpdate', now.getTime().toString());
+                
+                lastSyncTime = Date.now();
+                updateSyncStatus('connected');
+                showToast('数据上传成功！', 'success');
+            } catch (e) {
+                console.error('同步到Supabase失败:', e);
+                updateSyncStatus('error');
+                showToast('上传失败: ' + e.message, 'error');
+            }
+        }
+
+        // 从Supabase同步数据（带冲突解决）
+        async function syncFromSupabase() {
+            if (!supabase) {
+                showToast('请先配置Supabase', 'error');
+                return;
+            }
+            
+            try {
+                showToast('正在检查云端数据...', 'info');
+                
+                var { data, error } = await supabase.from('grade_data').select('*').eq('id', 'grade_data_single').single();
+                
+                if (error) {
+                    if (error.code === 'PGRST116') {
+                        showToast('云端暂无数据', 'info');
+                        return;
+                    }
+                    throw error;
+                }
+                
+                if (data && data.exams) {
+                    // 获取本地和云端的更新时间
+                    var localLastUpdate = localStorage.getItem('localDataLastUpdate');
+                    var cloudUpdatedAt = data.updatedAt ? new Date(data.updatedAt).getTime() : 0;
+                    var localUpdatedAt = localLastUpdate ? parseInt(localLastUpdate) : 0;
+                    
+                    var shouldMerge = false;
+                    
+                    // 比较时间戳，决定如何处理冲突
+                    if (cloudUpdatedAt > localUpdatedAt && localUpdatedAt > 0) {
+                        // 云端更新，提示用户
+                        if (!confirm('云端数据比本地新，是否覆盖本地数据？\n\n点击"取消"将尝试合并数据。')) {
+                            shouldMerge = true;
+                        }
+                    } else if (localUpdatedAt > cloudUpdatedAt) {
+                        // 本地更新，提示用户
+                        if (!confirm('本地数据比云端新，是否继续下载？\n\n点击"取消"将保留本地数据并上传到云端。')) {
+                            // 用户选择保留本地，直接上传
+                            await syncToSupabase();
+                            return;
+                        }
+                    } else if (!confirm('从云端下载数据，确定继续吗？')) {
+                        return;
+                    }
+                    
+                    if (shouldMerge) {
+                        // 简单的合并策略：合并考试记录，以考试ID去重，保留最新的
+                        showToast('正在合并数据...', 'info');
+                        var mergedExams = [];
+                        var examIds = new Set();
+                        
+                        // 先添加本地数据
+                        exams.forEach(function(exam) {
+                            if (!examIds.has(exam.id)) {
+                                examIds.add(exam.id);
+                                mergedExams.push(exam);
+                            }
+                        });
+                        
+                        // 再添加云端数据（不会重复添加）
+                        data.exams.forEach(function(exam) {
+                            if (!examIds.has(exam.id)) {
+                                examIds.add(exam.id);
+                                mergedExams.push(exam);
+                            }
+                        });
+                        
+                        // 按日期排序
+                        mergedExams.sort(function(a, b) {
+                            return new Date(a.date) - new Date(b.date);
+                        });
+                        
+                        exams = mergedExams;
+                    } else {
+                        // 直接覆盖
+                        exams = data.exams;
+                    }
+                    
+                    if (data.customBenchmarks) {
+                        customBenchmarks = data.customBenchmarks;
+                    }
+                    
+                    await Promise.all([
+                        saveToStorage(),
+                        data.studentSettings ? saveStudentSettingsToDB(data.studentSettings) : Promise.resolve(),
+                        data.benchmarkSettings ? saveBenchmarkSettingsToDB(data.benchmarkSettings) : Promise.resolve()
+                    ]);
+                    
+                    // 更新本地最后修改时间
+                    localStorage.setItem('localDataLastUpdate', cloudUpdatedAt.toString());
+                    
+                    updateUI();
+                    renderAllCharts();
+                    updateBackupUI();
+                    
+                    lastSyncTime = Date.now();
+                    updateSyncStatus('connected');
+                    showToast(shouldMerge ? '数据合并成功！' : '数据下载成功！', 'success');
+                } else {
+                    showToast('云端数据格式不正确', 'error');
+                }
+            } catch (e) {
+                console.error('从Supabase同步失败:', e);
+                updateSyncStatus('error');
+                showToast('下载失败: ' + e.message, 'error');
+            }
+        }
+
+        // 切换自动同步
+        function toggleAutoSync() {
+            autoSyncEnabled = document.getElementById('autoSyncToggle').checked;
+            if (autoSyncEnabled) {
+                startAutoSync();
+                showToast('自动同步已启用', 'success');
+            } else {
+                stopAutoSync();
+                showToast('自动同步已关闭', 'info');
+            }
+            
+            if (isLocalStorageAvailable()) {
+                localStorage.setItem('autoSyncEnabled', JSON.stringify(autoSyncEnabled));
+            }
+        }
+
+        // 启动自动同步
+        function startAutoSync() {
+            stopAutoSync();
+            autoSyncTimer = setInterval(function() {
+                if (supabase && syncStatus === 'connected') {
+                    syncToSupabase();
+                }
+            }, syncInterval);
+        }
+
+        // 停止自动同步
+        function stopAutoSync() {
+            if (autoSyncTimer) {
+                clearInterval(autoSyncTimer);
+                autoSyncTimer = null;
+            }
+        }
+
+        // 更改同步间隔
+        function changeSyncInterval() {
+            syncInterval = parseInt(document.getElementById('syncInterval').value) || 60000;
+            if (isLocalStorageAvailable()) {
+                localStorage.setItem('syncInterval', syncInterval.toString());
+            }
+            if (autoSyncEnabled) {
+                stopAutoSync();
+                startAutoSync();
+            }
+            showToast('同步间隔已更新', 'success');
+        }
+
+        // 加载自动同步设置
+        function loadAutoSyncSettings() {
+            if (!isLocalStorageAvailable()) return;
+            try {
+                var savedEnabled = localStorage.getItem('autoSyncEnabled');
+                if (savedEnabled !== null) {
+                    autoSyncEnabled = JSON.parse(savedEnabled);
+                    var toggle = document.getElementById('autoSyncToggle');
+                    if (toggle) toggle.checked = autoSyncEnabled;
+                }
+                
+                var savedInterval = localStorage.getItem('syncInterval');
+                if (savedInterval) {
+                    syncInterval = parseInt(savedInterval);
+                    var intervalSelect = document.getElementById('syncInterval');
+                    if (intervalSelect) intervalSelect.value = syncInterval.toString();
+                }
+            } catch (e) {
+                console.error('加载自动同步设置失败:', e);
+            }
+        }
+
+        // 修改保存考试数据的函数，在保存后自动同步
+        var originalSaveExam = saveExam;
+        saveExam = function() {
+            originalSaveExam();
+            // 更新本地最后修改时间
+            localStorage.setItem('localDataLastUpdate', Date.now().toString());
+            if (autoSyncEnabled && supabase && syncStatus === 'connected') {
+                setTimeout(function() { syncToSupabase(); }, 500);
+            }
+        };
+
+        // 修改删除考试数据的函数，在删除后自动同步
+        var originalDeleteExam = deleteExam;
+        deleteExam = function(examId) {
+            originalDeleteExam(examId);
+            // 更新本地最后修改时间
+            localStorage.setItem('localDataLastUpdate', Date.now().toString());
+            if (autoSyncEnabled && supabase && syncStatus === 'connected') {
+                setTimeout(function() { syncToSupabase(); }, 500);
+            }
+        };
+
+        // ================================================
         // 页面初始化
         // ================================================
+        // 修改原有的init函数，添加Supabase相关初始化
+        var originalInit = init;
+        init = function() {
+            originalInit();
+            loadSupabaseConfig();
+            loadAutoSyncSettings();
+            if (autoSyncEnabled && supabase) {
+                startAutoSync();
+            }
+        };
+        
         // 等待DOM加载完成后执行初始化
         document.addEventListener('DOMContentLoaded', init);
     </script>
