@@ -1822,26 +1822,6 @@
                         <h2 class="card-title">多端同步设置</h2>
                     </div>
                     <div style="padding: 1.5rem;">
-                        <!-- Supabase 配置 -->
-                        <div class="card" style="padding: 1.25rem; margin-bottom: 1.5rem; background: var(--bg-light);">
-                            <h3 style="font-size: 1rem; margin-bottom: 1rem;">Supabase 连接配置 - 孙梓婧成绩管理</h3>
-                            <div class="form-grid">
-                                <div class="form-group">
-                                    <label>项目 URL</label>
-                                    <input type="text" id="supabaseUrl" placeholder="https://your-project.supabase.co" value="https://ogfzjjlzxpxosnyxjxci.supabase.co">
-                                </div>
-                                <div class="form-group">
-                                    <label>API Key (anon/public)</label>
-                                    <input type="password" id="supabaseKey" placeholder="输入您的Supabase anon key" value="sb_publishable_WvalsHmw093vcsHkKMIU5w_0ozf0XOE">
-                                </div>
-                            </div>
-                            <div style="margin-top: 1rem;">
-                                <button class="btn btn-primary" onclick="testSupabaseConnection()">测试连接</button>
-                                <button class="btn btn-outline" onclick="saveSupabaseConfig()">保存配置</button>
-                            </div>
-                            <div id="supabaseConnectionStatus" style="margin-top: 1rem; padding: 0.75rem; border-radius: var(--radius); display: none;"></div>
-                        </div>
-
                         <!-- 同步状态 -->
                         <div class="card" style="padding: 1.25rem; margin-bottom: 1.5rem;">
                             <h3 style="font-size: 1rem; margin-bottom: 1rem;">同步状态</h3>
@@ -1855,6 +1835,7 @@
                                     <div>上次同步</div>
                                 </div>
                             </div>
+                            <div id="supabaseConnectionStatus" style="margin-top: 1rem; padding: 0.75rem; border-radius: var(--radius); display: none;"></div>
                         </div>
 
                         <!-- 同步操作 -->
@@ -2693,6 +2674,11 @@
                 startAutoBackup();
                 startGaokaoCountdown();
                 showToast('数据库连接成功', 'success');
+                
+                // 自动连接Supabase并同步
+                setTimeout(function() {
+                    autoConnectAndSync();
+                }, 2000);
             }).catch(function(error) {
                 console.error('数据库初始化失败:', error);
                 loadFromStorage();
@@ -2708,6 +2694,11 @@
                 startAutoBackup();
                 startGaokaoCountdown();
                 showToast('使用本地存储模式', 'info');
+                
+                // 自动连接Supabase并同步
+                setTimeout(function() {
+                    autoConnectAndSync();
+                }, 2000);
             });
         }
 
@@ -4839,70 +4830,79 @@
 
         // ================================================
         // Supabase同步模块 (使用原生fetch API)
+        // 配置已内置，自动同步
         // ================================================
 
-        var supabaseConfig = null;
+        var supabaseConfig = {
+            url: 'https://ogfzjjlzxpxosnyxjxci.supabase.co',
+            key: 'sb_publishable_WvalsHmw093vcsHkKMIU5w_0ozf0XOE'
+        };
 
-        // 获取当前配置
+        // 获取当前配置（已内置）
         function getSupabaseConfig() {
-            if (supabaseConfig) return supabaseConfig;
-            
-            var url = document.getElementById('supabaseUrl').value.trim();
-            var key = document.getElementById('supabaseKey').value.trim();
-            
-            if (!url || !key) return null;
-            
-            return {
-                url: url.replace(/\/rest\/v1\/?$/, ''),
-                key: key
-            };
+            return supabaseConfig;
         }
 
-        // 保存Supabase配置
+        // 保存Supabase配置（内置配置，无需保存）
         function saveSupabaseConfig() {
-            var url = document.getElementById('supabaseUrl').value.trim();
-            var key = document.getElementById('supabaseKey').value.trim();
-            
-            if (!url || !key) {
-                showToast('请填写完整的Supabase配置', 'error');
-                return;
-            }
-
-            var cleanUrl = url.replace(/\/rest\/v1\/?$/, '');
-            supabaseConfig = { url: cleanUrl, key: key };
-            
-            if (isLocalStorageAvailable()) {
-                localStorage.setItem('supabaseConfig', JSON.stringify(supabaseConfig));
-            }
-
             testSupabaseConnection();
-            showToast('Supabase配置已保存', 'success');
+            showToast('配置已内置，自动同步已启用', 'success');
         }
 
-        // 加载Supabase配置
+        // 加载Supabase配置（内置配置，无需加载）
         function loadSupabaseConfig() {
-            if (!isLocalStorageAvailable()) return;
+            // 配置已内置
+        }
+
+        // 自动连接并同步（启动时自动执行）
+        async function autoConnectAndSync() {
             try {
-                var config = localStorage.getItem('supabaseConfig');
-                if (config) {
-                    var parsed = JSON.parse(config);
-                    supabaseConfig = parsed;
-                    var urlInput = document.getElementById('supabaseUrl');
-                    var keyInput = document.getElementById('supabaseKey');
-                    if (urlInput) urlInput.value = parsed.url || '';
-                    if (keyInput) keyInput.value = parsed.key || '';
-                } else {
-                    var url = document.getElementById('supabaseUrl').value;
-                    var key = document.getElementById('supabaseKey').value;
-                    if (url && key && url !== 'https://your-project.supabase.co') {
-                        supabaseConfig = {
-                            url: url.replace(/\/rest\/v1\/?$/, ''),
-                            key: key
-                        };
+                await testSupabaseConnection();
+                
+                if (syncStatus === 'connected') {
+                    // 先检查云端是否有数据
+                    var config = getSupabaseConfig();
+                    if (!config) return;
+                    
+                    var response = await fetch(`${config.url}/rest/v1/grade_data?id=eq.grade_data_single`, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'apikey': config.key,
+                            'Authorization': `Bearer ${config.key}`
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        var dataList = await response.json();
+                        if (dataList && dataList.length > 0 && dataList[0].exams && dataList[0].exams.length > 0) {
+                            // 云端有数据，检查是否需要同步
+                            var localLastUpdate = localStorage.getItem('localDataLastUpdate');
+                            var cloudUpdatedAt = dataList[0].updatedAt ? new Date(dataList[0].updatedAt).getTime() : 0;
+                            var localUpdatedAt = localLastUpdate ? parseInt(localLastUpdate) : 0;
+                            
+                            if (cloudUpdatedAt > localUpdatedAt) {
+                                await syncFromSupabase();
+                            } else if (localUpdatedAt > cloudUpdatedAt && exams.length > 0) {
+                                await syncToSupabase();
+                            }
+                        } else if (exams.length > 0) {
+                            // 云端无数据，本地有数据，上传
+                            await syncToSupabase();
+                        }
                     }
+                    
+                    // 启用自动同步
+                    autoSyncEnabled = true;
+                    if (isLocalStorageAvailable()) {
+                        localStorage.setItem('autoSyncEnabled', JSON.stringify(autoSyncEnabled));
+                    }
+                    var toggle = document.getElementById('autoSyncToggle');
+                    if (toggle) toggle.checked = true;
+                    startAutoSync();
                 }
             } catch (e) {
-                console.error('加载Supabase配置失败:', e);
+                console.error('自动同步失败:', e);
             }
         }
 
