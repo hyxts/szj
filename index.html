@@ -309,6 +309,11 @@
             color: #ef4444;
             font-weight: 600;
         }
+        .cell-raw {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-left: 2px;
+        }
         .cell-scaled {
             font-size: 10px;
             color: var(--text-subtle);
@@ -470,6 +475,14 @@
         }
         .form-group input::placeholder {
             color: #cbd5e1;
+        }
+        .form-group input[type="number"]::-webkit-outer-spin-button,
+        .form-group input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .form-group input[type="number"] {
+            -moz-appearance: textfield;
         }
         .form-full {
             grid-column: span 2;
@@ -809,8 +822,8 @@
                                     <th>英语</th>
                                     <th>三科</th>
                                     <th>历史</th>
-                                    <th>政治<br><span class="th-sub">原始 / 赋分</span></th>
-                                    <th>地理<br><span class="th-sub">原始 / 赋分</span></th>
+                                    <th>政治<br><span class="th-sub">赋分 / 原始</span></th>
+                                    <th>地理<br><span class="th-sub">赋分 / 原始</span></th>
                                 </tr>
                             </thead>
                             <tbody id="examTableBody">
@@ -1193,7 +1206,7 @@
                 const raw = formatNum(rawScore);
                 const scaled = formatNum(scaledScore);
                 if (raw === '—' && scaled === '—') return '—';
-                return `${raw} <span class="cell-scaled">赋分: ${scaled}</span>`;
+                return `<span class="cell-score">${scaled}</span><span class="cell-raw">/${raw}</span>`;
             }
 
             function formatNum(val) {
