@@ -196,10 +196,6 @@
         .stat-card {
             background: var(--card-bg);
             padding: 16px;
-            border-bottom: 1px solid var(--border);
-        }
-        .stat-card:last-child {
-            border-bottom: none;
         }
         .stat-label {
             font-size: 12px;
@@ -224,61 +220,52 @@
         .table-wrapper {
             background: var(--card-bg);
             border-radius: var(--radius);
-            border: 1px solid var(--border);
             overflow: hidden;
-            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
         }
         .table-header {
-            padding: 14px 18px;
-            border-bottom: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
-            background: #fafbfc;
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+            background: #fafafa;
         }
         .table-header-title {
             font-weight: 600;
-            font-size: 15px;
-            letter-spacing: -0.2px;
+            font-size: 14px;
         }
         .table-header-subtitle {
-            font-size: 11px;
-            color: var(--text-subtle);
+            font-size: 12px;
+            color: var(--text-muted);
         }
         .table-scroll {
             overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
         }
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 13px;
-            white-space: nowrap;
-            min-width: 1200px;
         }
         thead th {
-            background: #f8fafc;
-            font-weight: 600;
-            color: var(--text-muted);
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.4px;
-            padding: 10px 12px;
+            padding: 12px 10px;
             text-align: center;
-            border-bottom: 2px solid var(--border);
+            font-weight: 600;
+            font-size: 12px;
+            color: var(--text-muted);
+            letter-spacing: 0.3px;
+            background: #f8fafc;
             position: sticky;
             top: 0;
-            z-index: 1;
+            z-index: 10;
         }
-        thead th .th-sub {
-            font-weight: 400;
+        thead th:first-child {
+            width: 100px;
+            min-width: 100px;
+        }
+        .th-sub {
             font-size: 10px;
+            font-weight: 400;
             color: var(--text-subtle);
-            display: block;
-            text-transform: none;
-            letter-spacing: 0;
         }
         tbody td {
             padding: 9px 12px;
@@ -321,51 +308,75 @@
         }
         .empty-state {
             text-align: center;
-            padding: 48px 20px;
+            padding: 30px;
             color: var(--text-muted);
-        }
-        .actions-cell {
-            display: flex;
-            gap: 4px;
-            justify-content: center;
-            flex-wrap: wrap;
         }
         .loading-row td {
+            padding: 20px;
             text-align: center;
-            padding: 32px;
-            color: var(--text-muted);
         }
         .loading-spinner {
             display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 2px solid var(--border);
+            width: 16px;
+            height: 16px;
+            border: 2px solid #e2e8f0;
             border-top-color: var(--primary);
             border-radius: 50%;
-            animation: spin 0.7s linear infinite;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
             vertical-align: middle;
-            margin-right: 6px;
         }
         @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
+            to { transform: rotate(360deg); }
+        }
+        .actions-cell {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+        }
+
+        /* ========== 图表区域 ========== */
+        .chart-section {
+            margin-bottom: 24px;
+        }
+        .chart-container {
+            padding: 16px;
+        }
+        .chart-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        .chart-grid:last-child {
+            margin-bottom: 0;
+        }
+        .chart-card {
+            background: #fafafa;
+            padding: 14px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+        }
+        .chart-card h4 {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            letter-spacing: 0.3px;
         }
 
         /* ========== 模态框 ========== */
         .modal-overlay {
+            display: none;
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(15, 23, 42, 0.5);
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
-            display: none;
-            justify-content: center;
-            align-items: center;
+            background: rgba(0, 0, 0, 0.5);
             z-index: 1000;
+            align-items: center;
+            justify-content: center;
             padding: 20px;
         }
         .modal-overlay.active {
@@ -373,25 +384,18 @@
         }
         .modal {
             background: #fff;
+            border-radius: var(--radius);
             width: 100%;
-            max-width: 850px;
+            max-width: 640px;
             max-height: 90vh;
-            border-radius: 14px;
             overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.2);
-            animation: modalIn 0.25s ease;
+            box-shadow: var(--shadow-lg);
+            transform: scale(0.95);
+            opacity: 0;
+            animation: modalIn 0.15s ease forwards;
         }
         @keyframes modalIn {
-            from {
-                opacity: 0;
-                transform: translateY(30px) scale(0.96);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
+            to { transform: scale(1); opacity: 1; }
         }
         .modal-header {
             padding: 16px 22px;
@@ -491,167 +495,84 @@
             grid-column: span 2;
             font-size: 13px;
             font-weight: 600;
-            color: var(--text-main);
-            padding-top: 8px;
-            margin-top: 4px;
-            border-top: 1px solid #f1f5f9;
-            letter-spacing: 0.3px;
+            color: var(--text-muted);
+            padding: 12px 0 8px;
+            border-top: 1px dashed var(--border);
+            margin-top: 8px;
         }
-        .form-section-title:first-child {
+        .form-section-title:first-of-type {
             border-top: none;
             padding-top: 0;
             margin-top: 0;
         }
 
-        /* Toast */
+        /* Toast 提示 */
         .toast {
             position: fixed;
-            bottom: 30px;
+            bottom: 20px;
             left: 50%;
             transform: translateX(-50%) translateY(100px);
-            background: #1e293b;
+            padding: 12px 20px;
+            background: #1f2937;
             color: #fff;
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-size: 13px;
+            border-radius: var(--radius);
+            font-size: 14px;
+            opacity: 0;
+            transition: all 0.3s ease;
             z-index: 2000;
-            transition: transform 0.35s cubic-bezier(0.23, 1, 0.32, 1);
-            pointer-events: none;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
-            letter-spacing: 0.2px;
+            box-shadow: var(--shadow-lg);
         }
         .toast.show {
             transform: translateX(-50%) translateY(0);
-        }
-        .toast.success {
-            background: #059669;
+            opacity: 1;
         }
         .toast.error {
             background: #dc2626;
         }
 
-        /* ========== 图表区域 ========== */
-        .chart-section {
-            margin-bottom: 24px;
-        }
-        .chart-container {
-            padding: 20px;
-        }
-        .chart-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-        .chart-grid:last-child {
-            margin-bottom: 0;
-        }
-        .chart-card {
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border);
-        }
-        .chart-card h4 {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text-main);
-            margin-bottom: 16px;
-            text-align: center;
-        }
-        .chart-card canvas {
-            max-height: 250px;
-        }
-        .chart-empty {
-            text-align: center;
-            padding: 60px 20px;
-            color: var(--text-muted);
-            font-size: 13px;
-        }
-
-        /* ========== 移动端适应 ========== */
+        /* ========== 响应式布局 ========== */
         @media (max-width: 768px) {
-            nav {
-                position: relative;
-            }
-            .nav-container {
-                flex-wrap: wrap;
-                height: auto;
-                padding: 10px 16px;
-                gap: 10px;
-            }
             .nav-menu {
                 display: none;
-                width: 100%;
+                position: absolute;
+                top: 56px;
+                left: 0;
+                right: 0;
+                background: #eff6ff;
                 flex-direction: column;
-                gap: 4px;
-                padding: 10px 0;
-                border-top: 1px solid var(--border);
+                padding: 10px 20px;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+                gap: 0;
             }
             .nav-menu.mobile-active {
                 display: flex;
             }
             .nav-item {
-                padding: 10px;
+                padding: 12px 10px;
                 border-radius: var(--radius-sm);
-            }
-            .nav-actions {
-                order: 1;
-                margin-left: auto;
-            }
-            .nav-actions .countdown {
-                display: none;
             }
             .mobile-nav-toggle {
                 display: flex;
-                order: 2;
             }
-            body {
-                padding: 0;
+            .nav-actions {
+                gap: 8px;
             }
-            .container {
-                padding: 12px;
+            .countdown-year,
+            .countdown-label {
+                display: none;
+            }
+            .countdown {
+                font-size: 12px;
+            }
+            .countdown-days {
+                font-size: 14px;
             }
             h1 {
                 font-size: 18px;
             }
-            .btn {
-                padding: 7px 14px;
-                font-size: 13px;
-            }
-            .countdown {
-                padding: 5px 10px;
-                font-size: 11px;
-            }
-            .countdown-days {
-                font-size: 16px;
-            }
-            .chart-grid {
-                grid-template-columns: 1fr;
-            }
-            .chart-card {
-                padding: 16px;
-            }
-            .chart-card canvas {
-                max-height: 200px;
-            }
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-            .form-full,
-            .form-section-title,
-            .col-span-2 {
-                grid-column: span 1;
-            }
-            .modal {
-                max-width: 100%;
-                border-radius: 16px 16px 0 0;
-                max-height: 95vh;
-            }
             .stats-grid {
                 grid-template-columns: repeat(3, 1fr);
-                gap: 8px;
+                gap: 10px;
             }
             .stat-card {
                 padding: 12px 10px;
@@ -663,31 +584,28 @@
                 font-size: 10px;
             }
             table {
-                min-width: 900px;
-                font-size: 11px;
+                font-size: 12px;
             }
             thead th {
+                padding: 10px 6px;
                 font-size: 10px;
-                padding: 8px 6px;
             }
             tbody td {
-                padding: 7px 6px;
-                font-size: 11px;
+                padding: 8px 6px;
             }
-            .modal-body {
-                padding: 14px;
+            .form-grid {
+                grid-template-columns: 1fr;
             }
-            .modal-header {
-                padding: 12px 16px;
-            }
-            .modal-footer {
-                padding: 10px 16px;
+            .form-full,
+            .form-section-title {
+                grid-column: span 1;
             }
         }
-        @media (max-width: 400px) {
+
+        @media (max-width: 560px) {
             .stats-grid {
-                grid-template-columns: 1fr 1fr 1fr;
-                gap: 6px;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
             }
             .stat-card {
                 padding: 10px 8px;
@@ -696,11 +614,17 @@
                 font-size: 18px;
             }
             .header-actions {
-                width: 100%;
+                gap: 6px;
             }
-            .header-actions .btn {
-                flex: 1;
-                justify-content: center;
+            .btn {
+                font-size: 13px;
+                padding: 3px 6px;
+            }
+            .nav-container {
+                padding: 0 12px;
+            }
+            .container {
+                padding: 12px;
             }
         }
     </style>
@@ -719,7 +643,9 @@
             </div>
             <div class="nav-actions">
                 <div class="countdown" id="gaokaoCountdown">
-                    <span>距离高考</span>
+                    <span>距离</span>
+                    <span class="countdown-year" id="countdownYear">—</span>
+                    <span>年高考</span>
                     <span class="countdown-days" id="countdownDays">—</span>
                     <span class="countdown-label">天</span>
                 </div>
@@ -728,7 +654,7 @@
         </div>
     </nav>
 
-    <!-- 主内容区域 -->
+    <!-- 主内容区 -->
     <div class="container">
         <!-- 页面内容 -->
         <div class="page-container">
@@ -751,11 +677,11 @@
                 </div>
 
                 <!-- 图表区域 -->
-                <div class="chart-section" id="chartSection" style="margin-bottom: 24px;">
+                <div class="chart-section" id="chartSection">
                     <div class="table-wrapper">
                         <div class="table-header">
                             <span class="table-header-title">成绩趋势分析</span>
-                            <span class="table-header-subtitle" id="chartInfo">正在加载图表...</span>
+                            <span class="table-header-subtitle" id="chartInfo">请添加至少2次考试记录以生成图表</span>
                         </div>
                         <div class="chart-container">
                             <div class="chart-grid">
@@ -791,12 +717,8 @@
                         <h1>成绩记录</h1>
                     </div>
                     <div class="header-actions">
-                        <button class="btn" onclick="window.openAddModal()">
-                            添加记录
-                        </button>
-                        <button class="btn btn-outline" onclick="window.refreshData()">
-                            刷新
-                        </button>
+                        <button class="btn" onclick="window.openAddModal()">添加记录</button>
+                        <button class="btn btn-outline" onclick="window.refreshData()">刷新</button>
                     </div>
                 </header>
 
@@ -804,7 +726,7 @@
                 <div class="table-wrapper">
                     <div class="table-header">
                         <span class="table-header-title">成绩列表</span>
-                        <span class="table-header-subtitle" id="tableInfo">加载中...</span>
+                        <span class="table-header-subtitle" id="tableInfo">正在加载数据...</span>
                     </div>
                     <div class="table-scroll">
                         <table>
@@ -848,7 +770,7 @@
                 </header>
 
                 <!-- 详细分析图表 -->
-                <div class="chart-section" style="margin-bottom: 24px;">
+                <div class="chart-section">
                     <div class="table-wrapper">
                         <div class="table-header">
                             <span class="table-header-title">详细分析</span>
@@ -909,83 +831,170 @@
         </div>
     </div>
 
-    <!-- Toast 提示 -->
-    <div class="toast" id="toast"></div>
-
-    <!-- 添加/编辑模态框 -->
+    <!-- 模态框 -->
     <div class="modal-overlay" id="modalOverlay">
         <div class="modal">
             <div class="modal-header">
                 <h3 id="modalTitle">添加成绩记录</h3>
-                <button class="close-modal" onclick="window.closeModal()" aria-label="关闭">×</button>
+                <button class="close-modal" onclick="window.closeModal()">×</button>
             </div>
             <div class="modal-body">
-                <form id="examForm" autocomplete="off">
-                    <input type="hidden" id="editId">
+                <form id="examForm" onsubmit="event.preventDefault()">
+                    <input type="hidden" id="editId" name="editId">
                     <div class="form-grid">
-                        <!-- 考试类型 -->
                         <div class="form-group form-full">
-                            <label>考试类型 *</label>
-                            <input type="text" id="exam_type" placeholder="例如：高一上期末、一模、二模..." required>
+                            <label>考试类型</label>
+                            <input type="text" id="exam_type" placeholder="如：高一上期末" required>
                         </div>
 
-                        <!-- 基础总分与排名 -->
-                        <div class="form-section-title">总分与综合排名</div>
-                        <div class="form-group"><label>总分</label><input type="number" step="0.1" id="total_score" placeholder="0.0"></div>
-                        <div class="form-group"><label>区排名</label><input type="number" id="rank_district" placeholder="—"></div>
-                        <div class="form-group"><label>校排名</label><input type="number" id="rank_school" placeholder="—"></div>
-                        <div class="form-group"><label>班排名</label><input type="number" id="rank_class" placeholder="—"></div>
-                        <div class="form-group"><label>主科总分</label><input type="number" step="0.1" id="main_subjects_score" placeholder="0.0"></div>
-                        <div class="form-group"></div>
+                        <div class="form-section-title">基本信息</div>
+                        <div class="form-group">
+                            <label>总分</label>
+                            <input type="number" step="0.1" id="total_score" placeholder="0.0" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>区排名</label>
+                            <input type="number" id="rank_district" placeholder="—">
+                        </div>
+                        <div class="form-group">
+                            <label>校排名</label>
+                            <input type="number" id="rank_school" placeholder="—">
+                        </div>
+                        <div class="form-group">
+                            <label>班排名</label>
+                            <input type="number" id="rank_class" placeholder="—">
+                        </div>
+                        <div class="form-group">
+                            <label>主科总分</label>
+                            <input type="number" step="0.1" id="main_subjects_score" placeholder="0.0" readonly>
+                        </div>
 
                         <!-- 语文 -->
                         <div class="form-section-title">语文</div>
-                        <div class="form-group"><label>语文分数</label><input type="number" step="0.1" id="chinese_score" placeholder="0.0"></div>
-                        <div class="form-group"><label>语文 · 区排名</label><input type="number" id="chinese_rank_district" placeholder="—"></div>
-                        <div class="form-group"><label>语文 · 校排名</label><input type="number" id="chinese_rank_school" placeholder="—"></div>
-                        <div class="form-group"><label>语文 · 班排名</label><input type="number" id="chinese_rank_class" placeholder="—"></div>
+                        <div class="form-group">
+                            <label>语文分数</label>
+                            <input type="number" step="0.1" id="chinese_score" placeholder="0.0">
+                        </div>
+                        <div class="form-group">
+                            <label>语文 · 区排名</label>
+                            <input type="number" id="chinese_rank_district" placeholder="—">
+                        </div>
+                        <div class="form-group">
+                            <label>语文 · 校排名</label>
+                            <input type="number" id="chinese_rank_school" placeholder="—">
+                        </div>
+                        <div class="form-group">
+                            <label>语文 · 班排名</label>
+                            <input type="number" id="chinese_rank_class" placeholder="—">
+                        </div>
 
                         <!-- 数学 -->
                         <div class="form-section-title">数学</div>
-                        <div class="form-group"><label>数学分数</label><input type="number" step="0.1" id="math_score" placeholder="0.0"></div>
-                        <div class="form-group"><label>数学 · 区排名</label><input type="number" id="math_rank_district" placeholder="—"></div>
-                        <div class="form-group"><label>数学 · 校排名</label><input type="number" id="math_rank_school" placeholder="—"></div>
-                        <div class="form-group"><label>数学 · 班排名</label><input type="number" id="math_rank_class" placeholder="—"></div>
+                        <div class="form-group">
+                            <label>数学分数</label>
+                            <input type="number" step="0.1" id="math_score" placeholder="0.0">
+                        </div>
+                        <div class="form-group">
+                            <label>数学 · 区排名</label>
+                            <input type="number" id="math_rank_district" placeholder="—">
+                        </div>
+                        <div class="form-group">
+                            <label>数学 · 校排名</label>
+                            <input type="number" id="math_rank_school" placeholder="—">
+                        </div>
+                        <div class="form-group">
+                            <label>数学 · 班排名</label>
+                            <input type="number" id="math_rank_class" placeholder="—">
+                        </div>
 
                         <!-- 英语 -->
                         <div class="form-section-title">英语</div>
-                        <div class="form-group"><label>英语分数</label><input type="number" step="0.1" id="english_score" placeholder="0.0"></div>
-                        <div class="form-group"><label>英语 · 区排名</label><input type="number" id="english_rank_district" placeholder="—"></div>
-                        <div class="form-group"><label>英语 · 校排名</label><input type="number" id="english_rank_school" placeholder="—"></div>
-                        <div class="form-group"><label>英语 · 班排名</label><input type="number" id="english_rank_class" placeholder="—"></div>
+                        <div class="form-group">
+                            <label>英语分数</label>
+                            <input type="number" step="0.1" id="english_score" placeholder="0.0">
+                        </div>
+                        <div class="form-group">
+                            <label>英语 · 区排名</label>
+                            <input type="number" id="english_rank_district" placeholder="—">
+                        </div>
+                        <div class="form-group">
+                            <label>英语 · 校排名</label>
+                            <input type="number" id="english_rank_school" placeholder="—">
+                        </div>
+                        <div class="form-group">
+                            <label>英语 · 班排名</label>
+                            <input type="number" id="english_rank_class" placeholder="—">
+                        </div>
 
-                        <!-- 三科汇总 -->
-                        <div class="form-section-title">三科汇总</div>
-                        <div class="form-group"><label>三科总分</label><input type="number" step="0.1" id="three_subjects_sum" placeholder="0.0"></div>
-                        <div class="form-group"></div>
+                        <div class="form-group">
+                            <label>三科总分</label>
+                            <input type="number" step="0.1" id="three_subjects_sum" placeholder="0.0" readonly>
+                        </div>
 
                         <!-- 历史 -->
                         <div class="form-section-title">历史</div>
-                        <div class="form-group"><label>历史分数</label><input type="number" step="0.1" id="history_score" placeholder="0.0"></div>
-                        <div class="form-group"><label>历史 · 区排名</label><input type="number" id="history_rank_district" placeholder="—"></div>
-                        <div class="form-group"><label>历史 · 校排名</label><input type="number" id="history_rank_school" placeholder="—"></div>
-                        <div class="form-group"><label>历史 · 班排名</label><input type="number" id="history_rank_class" placeholder="—"></div>
+                        <div class="form-group">
+                            <label>历史分数</label>
+                            <input type="number" step="0.1" id="history_score" placeholder="0.0">
+                        </div>
+                        <div class="form-group">
+                            <label>历史 · 区排名</label>
+                            <input type="number" id="history_rank_district" placeholder="—">
+                        </div>
+                        <div class="form-group">
+                            <label>历史 · 校排名</label>
+                            <input type="number" id="history_rank_school" placeholder="—">
+                        </div>
+                        <div class="form-group">
+                            <label>历史 · 班排名</label>
+                            <input type="number" id="history_rank_class" placeholder="—">
+                        </div>
 
                         <!-- 政治 -->
                         <div class="form-section-title">政治</div>
-                        <div class="form-group"><label>政治原始分</label><input type="number" step="0.1" id="politics_score" placeholder="0.0"></div>
-                        <div class="form-group"><label>政治 · 赋分</label><input type="number" step="0.1" id="politics_scaled_score" placeholder="0.0"></div>
-                        <div class="form-group"><label>政治 · 区排名</label><input type="number" id="politics_rank_district" placeholder="—"></div>
-                        <div class="form-group"><label>政治 · 校排名</label><input type="number" id="politics_rank_school" placeholder="—"></div>
-                        <div class="form-group"><label>政治 · 班排名</label><input type="number" id="politics_rank_class" placeholder="—"></div>
+                        <div class="form-group">
+                            <label>政治原始分</label>
+                            <input type="number" step="0.1" id="politics_score" placeholder="0.0">
+                        </div>
+                        <div class="form-group">
+                            <label>政治 · 赋分</label>
+                            <input type="number" step="0.1" id="politics_scaled_score" placeholder="0.0">
+                        </div>
+                        <div class="form-group">
+                            <label>政治 · 区排名</label>
+                            <input type="number" id="politics_rank_district" placeholder="—">
+                        </div>
+                        <div class="form-group">
+                            <label>政治 · 校排名</label>
+                            <input type="number" id="politics_rank_school" placeholder="—">
+                        </div>
+                        <div class="form-group">
+                            <label>政治 · 班排名</label>
+                            <input type="number" id="politics_rank_class" placeholder="—">
+                        </div>
 
                         <!-- 地理 -->
                         <div class="form-section-title">地理</div>
-                        <div class="form-group"><label>地理原始分</label><input type="number" step="0.1" id="geography_score" placeholder="0.0"></div>
-                        <div class="form-group"><label>地理 · 赋分</label><input type="number" step="0.1" id="geography_scaled_score" placeholder="0.0"></div>
-                        <div class="form-group"><label>地理 · 区排名</label><input type="number" id="geography_rank_district" placeholder="—"></div>
-                        <div class="form-group"><label>地理 · 校排名</label><input type="number" id="geography_rank_school" placeholder="—"></div>
-                        <div class="form-group"><label>地理 · 班排名</label><input type="number" id="geography_rank_class" placeholder="—"></div>
+                        <div class="form-group">
+                            <label>地理原始分</label>
+                            <input type="number" step="0.1" id="geography_score" placeholder="0.0">
+                        </div>
+                        <div class="form-group">
+                            <label>地理 · 赋分</label>
+                            <input type="number" step="0.1" id="geography_scaled_score" placeholder="0.0">
+                        </div>
+                        <div class="form-group">
+                            <label>地理 · 区排名</label>
+                            <input type="number" id="geography_rank_district" placeholder="—">
+                        </div>
+                        <div class="form-group">
+                            <label>地理 · 校排名</label>
+                            <input type="number" id="geography_rank_school" placeholder="—">
+                        </div>
+                        <div class="form-group">
+                            <label>地理 · 班排名</label>
+                            <input type="number" id="geography_rank_class" placeholder="—">
+                        </div>
                     </div>
                 </form>
             </div>
@@ -995,6 +1004,9 @@
             </div>
         </div>
     </div>
+
+    <!-- Toast 提示 -->
+    <div id="toast"></div>
 
     <script>
         (function() {
@@ -1006,49 +1018,135 @@
             const TABLE_NAME = 'exams';
             // ================================================
 
-            // 初始化 Supabase（CDN 加载后全局变量名为 supabase）
-            const supabaseClient = supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
-
-            // 全局暴露
-            window.supabase = supabaseClient;
-
-            // DOM 元素
-            const tbody = document.getElementById('examTableBody');
-            const modal = document.getElementById('modalOverlay');
-            const form = document.getElementById('examForm');
-            const modalTitle = document.getElementById('modalTitle');
-            const editIdInput = document.getElementById('editId');
-            const saveBtn = document.getElementById('saveBtn');
-            const tableInfo = document.getElementById('tableInfo');
-            const toastEl = document.getElementById('toast');
-
+            // 全局状态
             let isEditMode = false;
             let toastTimer = null;
             let countdownTimer = null;
             let charts = {};
             let currentPage = 'dashboard';
 
+            // DOM 元素引用
+            const DOM = {
+                tbody: document.getElementById('examTableBody'),
+                modal: document.getElementById('modalOverlay'),
+                form: document.getElementById('examForm'),
+                modalTitle: document.getElementById('modalTitle'),
+                editIdInput: document.getElementById('editId'),
+                saveBtn: document.getElementById('saveBtn'),
+                tableInfo: document.getElementById('tableInfo'),
+                toastEl: document.getElementById('toast')
+            };
+
+            // 初始化 Supabase
+            let supabaseClient;
+            try {
+                supabaseClient = supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+                window.supabase = supabaseClient;
+            } catch (error) {
+                console.error('Supabase 初始化失败:', error);
+                showToast('数据库连接失败', 'error');
+            }
+
+            // ============ 工具函数 ============
+            
+            /**
+             * 格式化数字显示
+             */
+            function formatNum(val) {
+                if (val === null || val === undefined || val === '') return '—';
+                const num = parseFloat(val);
+                if (isNaN(num)) return '—';
+                return Number.isInteger(num) ? num.toString() : num.toFixed(1);
+            }
+
+            /**
+             * 格式化排名显示
+             */
+            function formatRank(val) {
+                if (val === null || val === undefined || val === '') return '—';
+                const num = parseInt(val);
+                if (isNaN(num)) return '—';
+                if (num <= 10) return `<span class="cell-rank-high">${num}</span>`;
+                return num.toString();
+            }
+
+            /**
+             * HTML 转义
+             */
+            function escapeHtml(str) {
+                if (!str) return '';
+                const div = document.createElement('div');
+                div.textContent = str;
+                return div.innerHTML;
+            }
+
+            /**
+             * Toast 提示
+             */
+            function showToast(message, type = '') {
+                if (toastTimer) clearTimeout(toastTimer);
+                DOM.toastEl.textContent = message;
+                DOM.toastEl.className = 'toast ' + type + ' show';
+                toastTimer = setTimeout(() => {
+                    DOM.toastEl.classList.remove('show');
+                }, 2200);
+            }
+
+            // ============ 高考倒计时 ============
+            
+            function updateGaokaoCountdown() {
+                const yearEl = document.getElementById('countdownYear');
+                const daysEl = document.getElementById('countdownDays');
+                if (!yearEl || !daysEl) return;
+
+                const now = new Date();
+                const currentYear = now.getFullYear();
+                let gaokaoYear = currentYear;
+                let gaokaoDate = new Date(currentYear, 5, 7);
+
+                if (now > gaokaoDate) {
+                    gaokaoYear = currentYear + 1;
+                    gaokaoDate = new Date(gaokaoYear, 5, 7);
+                }
+
+                yearEl.textContent = gaokaoYear;
+
+                const diff = gaokaoDate - now;
+                const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+
+                if (days > 0) {
+                    daysEl.textContent = days;
+                } else if (days === 0) {
+                    daysEl.textContent = '今天!';
+                } else {
+                    daysEl.textContent = '考试中';
+                }
+            }
+
+            function startCountdownTimer() {
+                updateGaokaoCountdown();
+                if (countdownTimer) clearInterval(countdownTimer);
+                countdownTimer = setInterval(updateGaokaoCountdown, 60000);
+            }
+
             // ============ 页面切换 ============
+            
             function switchPage(pageId) {
                 if (currentPage === pageId) return;
 
-                // 隐藏所有页面
                 document.querySelectorAll('.page').forEach(page => {
                     page.style.display = 'none';
                 });
 
-                // 更新导航状态
                 document.querySelectorAll('.nav-item').forEach(item => {
                     item.classList.remove('active');
                 });
 
-                // 显示目标页面
                 const targetPage = document.getElementById('page-' + pageId);
                 if (targetPage) {
                     targetPage.style.display = 'block';
                 }
 
-                // 更新导航高亮
                 const navItem = document.querySelector('.nav-item[data-page="' + pageId + '"]');
                 if (navItem) {
                     navItem.classList.add('active');
@@ -1071,137 +1169,173 @@
                 navMenu.classList.toggle('mobile-active');
             }
 
-            function updateGaokaoCountdown() {
-                const countdownEl = document.getElementById('countdownDays');
-                if (!countdownEl) return;
+            // ============ 总分计算 ============
+            
+            /**
+             * 计算单条记录的总分
+             */
+            function calculateRecordTotals(record) {
+                const chinese = parseFloat(record.chinese_score) || 0;
+                const math = parseFloat(record.math_score) || 0;
+                const english = parseFloat(record.english_score) || 0;
+                const history = parseFloat(record.history_score) || 0;
+                const politicsScaled = parseFloat(record.politics_scaled_score) || 0;
+                const geographyScaled = parseFloat(record.geography_scaled_score) || 0;
+                
+                const mainSum = chinese + math + english;
+                const threeSum = history + politicsScaled + geographyScaled;
+                const totalSum = mainSum + threeSum;
+                
+                return {
+                    main_subjects_score: mainSum > 0 ? mainSum.toFixed(1) : null,
+                    three_subjects_sum: threeSum > 0 ? threeSum.toFixed(1) : null,
+                    total_score: totalSum > 0 ? totalSum.toFixed(1) : null
+                };
+            }
 
-                const now = new Date();
-                const currentYear = now.getFullYear();
-                let gaokaoDate = new Date(currentYear, 5, 7); // 6月7日
-
-                if (now > gaokaoDate) {
-                    gaokaoDate = new Date(currentYear + 1, 5, 7); // 明年
+            /**
+             * 自动计算表单总分
+             */
+            function calculateFormTotals() {
+                const totals = calculateRecordTotals({
+                    chinese_score: document.getElementById('chinese_score').value,
+                    math_score: document.getElementById('math_score').value,
+                    english_score: document.getElementById('english_score').value,
+                    history_score: document.getElementById('history_score').value,
+                    politics_scaled_score: document.getElementById('politics_scaled_score').value,
+                    geography_scaled_score: document.getElementById('geography_scaled_score').value
+                });
+                
+                if (totals.main_subjects_score) {
+                    document.getElementById('main_subjects_score').value = totals.main_subjects_score;
                 }
-
-                const diff = gaokaoDate - now;
-                const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
-
-                if (days > 0) {
-                    countdownEl.textContent = days;
-                } else if (days === 0) {
-                    countdownEl.textContent = '今天!';
-                } else {
-                    countdownEl.textContent = '考试中';
+                if (totals.three_subjects_sum) {
+                    document.getElementById('three_subjects_sum').value = totals.three_subjects_sum;
+                }
+                if (totals.total_score) {
+                    document.getElementById('total_score').value = totals.total_score;
                 }
             }
 
-            function startCountdownTimer() {
-                updateGaokaoCountdown();
-                if (countdownTimer) clearInterval(countdownTimer);
-                countdownTimer = setInterval(updateGaokaoCountdown, 60000); // 每分钟更新
+            /**
+             * 设置表单自动计算监听
+             */
+            function setupAutoCalculate() {
+                const subjectFields = [
+                    'chinese_score', 'math_score', 'english_score',
+                    'history_score', 'politics_scaled_score', 'geography_scaled_score'
+                ];
+                
+                subjectFields.forEach(field => {
+                    const el = document.getElementById(field);
+                    if (el) {
+                        el.addEventListener('input', calculateFormTotals);
+                        el.addEventListener('change', calculateFormTotals);
+                    }
+                });
             }
 
-            // Toast 提示
-            function showToast(message, type = '') {
-                if (toastTimer) clearTimeout(toastTimer);
-                toastEl.textContent = message;
-                toastEl.className = 'toast ' + type + ' show';
-                toastTimer = setTimeout(() => {
-                    toastEl.classList.remove('show');
-                }, 2200);
-            }
-
-            // ============ 数据获取 ============
+            // ============ 数据操作 ============
+            
+            /**
+             * 获取数据
+             */
             async function fetchData() {
-                // 显示加载状态
-                tbody.innerHTML = `
-                        <tr class="loading-row">
-                            <td colspan="14">
-                                <span class="loading-spinner"></span>正在加载数据...
+                DOM.tbody.innerHTML = `
+                    <tr class="loading-row">
+                        <td colspan="14">
+                            <span class="loading-spinner"></span>正在加载数据...
+                        </td>
+                    </tr>`;
+                DOM.tableInfo.textContent = '加载中...';
+
+                try {
+                    const { data, error } = await supabaseClient
+                        .from(TABLE_NAME)
+                        .select('*')
+                        .order('created_at', { ascending: false });
+
+                    if (error) {
+                        throw error;
+                    }
+
+                    const calculatedData = data.map(record => ({
+                        ...record,
+                        ...calculateRecordTotals(record)
+                    }));
+
+                    renderTable(calculatedData);
+                    updateStats(calculatedData);
+                    updateCharts(calculatedData);
+                    DOM.tableInfo.textContent = `共 ${data.length} 条记录 - 通过 Supabase 同步`;
+                    document.getElementById('chartInfo').textContent = data.length >= 2 
+                        ? `基于 ${data.length} 次考试数据生成` 
+                        : '请添加至少2次考试记录以生成图表';
+
+                } catch (error) {
+                    console.error('数据加载失败:', error);
+                    DOM.tbody.innerHTML = `
+                        <tr>
+                            <td colspan="14" class="empty-state">
+                                数据加载失败：${error.message}
+                                <br><button class="btn btn-sm btn-outline" style="margin-top:10px;" onclick="window.refreshData()">重试</button>
                             </td>
                         </tr>`;
-                tableInfo.textContent = '加载中...';
-
-                const { data, error } = await supabaseClient
-                    .from(TABLE_NAME)
-                    .select('*')
-                    .order('created_at', { ascending: false });
-
-                if (error) {
-                    tbody.innerHTML = `
-                            <tr>
-                                <td colspan="14" class="empty-state">
-                                    数据加载失败：${error.message}
-                                    <br><button class="btn btn-sm btn-outline" style="margin-top:10px;" onclick="window.refreshData()">重试</button>
-                                </td>
-                            </tr>`;
-                    tableInfo.textContent = '加载失败';
+                    DOM.tableInfo.textContent = '加载失败';
                     updateStats([]);
                     showToast('数据加载失败，请检查网络连接', 'error');
-                    return;
                 }
-
-                const calculatedData = data.map(record => {
-                    const totals = calculateRecordTotals(record);
-                    return {
-                        ...record,
-                        ...totals
-                    };
-                });
-
-                renderTable(calculatedData);
-                updateStats(calculatedData);
-                updateCharts(calculatedData);
-                tableInfo.textContent = `共 ${data.length} 条记录 - 通过 Supabase 同步`;
-                document.getElementById('chartInfo').textContent = data.length >= 2 ? `基于 ${data.length} 次考试数据生成` : '请添加至少2次考试记录以生成图表';
             }
 
-            // ============ 渲染表格 ============
+            /**
+             * 渲染表格
+             */
             function renderTable(data) {
-                tbody.innerHTML = '';
+                DOM.tbody.innerHTML = '';
                 if (!data || data.length === 0) {
-                    tbody.innerHTML = `
-                            <tr>
-                                <td colspan="14" class="empty-state">
-                                    暂无成绩数据
-                                    <br><span style="font-size:12px;color:#94a3b8;">点击右上角"添加记录"开始录入</span>
-                                </td>
-                            </tr>`;
+                    DOM.tbody.innerHTML = `
+                        <tr>
+                            <td colspan="14" class="empty-state">
+                                暂无成绩数据
+                                <br><span style="font-size:12px;color:#94a3b8;">点击右上角"添加记录"开始录入</span>
+                            </td>
+                        </tr>`;
                     return;
                 }
 
                 data.forEach(row => {
                     const tr = document.createElement('tr');
-                    const politicsDisplay = buildScaledDisplay(row.politics_score, row
-                        .politics_scaled_score);
-                    const geographyDisplay = buildScaledDisplay(row.geography_score, row
-                        .geography_scaled_score);
+                    const politicsDisplay = buildScaledDisplay(row.politics_score, row.politics_scaled_score);
+                    const geographyDisplay = buildScaledDisplay(row.geography_score, row.geography_scaled_score);
 
                     tr.innerHTML = `
-                            <td>
-                                <div class="actions-cell">
-                                    <button class="btn btn-sm btn-outline" onclick="window.editRecord('${row.id}')" title="编辑">编辑</button>
-                                    <button class="btn btn-sm btn-danger" onclick="window.deleteRecord('${row.id}')" title="删除">删除</button>
-                                </div>
-                            </td>
-                            <td><strong>${escapeHtml(row.exam_type) || '—'}</strong></td>
-                            <td class="cell-score">${formatNum(row.total_score)}</td>
-                            <td class="cell-rank">${formatRank(row.rank_district)}</td>
-                            <td class="cell-rank">${formatRank(row.rank_school)}</td>
-                            <td class="cell-rank">${formatRank(row.rank_class)}</td>
-                            <td class="cell-score">${formatNum(row.main_subjects_score)}</td>
-                            <td class="cell-score">${formatNum(row.chinese_score)}</td>
-                            <td class="cell-score">${formatNum(row.math_score)}</td>
-                            <td class="cell-score">${formatNum(row.english_score)}</td>
-                            <td class="cell-score">${formatNum(row.three_subjects_sum)}</td>
-                            <td class="cell-score">${formatNum(row.history_score)}</td>
-                            <td>${politicsDisplay}</td>
-                            <td>${geographyDisplay}</td>
-                        `;
-                    tbody.appendChild(tr);
+                        <td>
+                            <div class="actions-cell">
+                                <button class="btn btn-sm btn-outline" onclick="window.editRecord('${row.id}')" title="编辑">编辑</button>
+                                <button class="btn btn-sm btn-danger" onclick="window.deleteRecord('${row.id}')" title="删除">删除</button>
+                            </div>
+                        </td>
+                        <td><strong>${escapeHtml(row.exam_type) || '—'}</strong></td>
+                        <td class="cell-score">${formatNum(row.total_score)}</td>
+                        <td class="cell-rank">${formatRank(row.rank_district)}</td>
+                        <td class="cell-rank">${formatRank(row.rank_school)}</td>
+                        <td class="cell-rank">${formatRank(row.rank_class)}</td>
+                        <td class="cell-score">${formatNum(row.main_subjects_score)}</td>
+                        <td class="cell-score">${formatNum(row.chinese_score)}</td>
+                        <td class="cell-score">${formatNum(row.math_score)}</td>
+                        <td class="cell-score">${formatNum(row.english_score)}</td>
+                        <td class="cell-score">${formatNum(row.three_subjects_sum)}</td>
+                        <td class="cell-score">${formatNum(row.history_score)}</td>
+                        <td>${politicsDisplay}</td>
+                        <td>${geographyDisplay}</td>
+                    `;
+                    DOM.tbody.appendChild(tr);
                 });
             }
 
+            /**
+             * 构建赋分显示格式
+             */
             function buildScaledDisplay(rawScore, scaledScore) {
                 const raw = formatNum(rawScore);
                 const scaled = formatNum(scaledScore);
@@ -1209,31 +1343,9 @@
                 return `<span class="cell-score">${scaled}</span><span class="cell-raw">/${raw}</span>`;
             }
 
-            function formatNum(val) {
-                if (val === null || val === undefined || val === '') return '—';
-                const num = parseFloat(val);
-                if (isNaN(num)) return '—';
-                // 如果是整数就不显示小数
-                return Number.isInteger(num) ? num.toString() : num.toFixed(1);
-            }
-
-            function formatRank(val) {
-                if (val === null || val === undefined || val === '') return '—';
-                const num = parseInt(val);
-                if (isNaN(num)) return '—';
-                // 排名靠前高亮
-                if (num <= 10) return `<span class="cell-rank-high">${num}</span>`;
-                return num.toString();
-            }
-
-            function escapeHtml(str) {
-                if (!str) return '';
-                const div = document.createElement('div');
-                div.textContent = str;
-                return div.innerHTML;
-            }
-
-            // ============ 更新统计 ============
+            /**
+             * 更新统计数据
+             */
             function updateStats(data) {
                 const totalEl = document.getElementById('totalRecords');
                 const avgEl = document.getElementById('avgScore');
@@ -1243,14 +1355,13 @@
                     totalEl.textContent = '0';
                     avgEl.textContent = '—';
                     maxEl.textContent = '—';
+                    updateStatsTable([]);
                     return;
                 }
 
                 totalEl.textContent = data.length;
 
-                let totalSum = 0,
-                    count = 0,
-                    maxS = -Infinity;
+                let totalSum = 0, count = 0, maxS = -Infinity;
                 data.forEach(row => {
                     if (row.total_score !== null && row.total_score !== undefined && row.total_score !== '') {
                         const val = parseFloat(row.total_score);
@@ -1267,15 +1378,15 @@
                 updateStatsTable(data);
             }
 
+            /**
+             * 更新统计表格
+             */
             function updateStatsTable(data) {
                 const statsTableBody = document.getElementById('statsTableBody');
                 if (!statsTableBody) return;
 
                 if (!data || data.length === 0) {
-                    statsTableBody.innerHTML = `
-                        <tr>
-                            <td colspan="5" class="empty-state">暂无数据</td>
-                        </tr>`;
+                    statsTableBody.innerHTML = `<tr><td colspan="5" class="empty-state">暂无数据</td></tr>`;
                     return;
                 }
 
@@ -1299,14 +1410,7 @@
                     }).filter(v => v !== null);
 
                     if (values.length === 0) {
-                        html += `
-                            <tr>
-                                <td>${subject.name}</td>
-                                <td>—</td>
-                                <td>—</td>
-                                <td>—</td>
-                                <td>—</td>
-                            </tr>`;
+                        html += `<tr><td>${subject.name}</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>`;
                     } else {
                         const avg = values.reduce((a, b) => a + b, 0) / values.length;
                         const max = Math.max(...values);
@@ -1329,6 +1433,10 @@
             }
 
             // ============ 图表功能 ============
+            
+            /**
+             * 初始化图表
+             */
             function initCharts() {
                 const chartConfig = {
                     responsive: true,
@@ -1344,26 +1452,16 @@
                         }
                     },
                     scales: {
-                        y: {
-                            beginAtZero: false,
-                            grid: { color: '#f1f5f9' }
-                        },
-                        x: {
-                            grid: { display: false }
-                        }
+                        y: { beginAtZero: false, grid: { color: '#f1f5f9' } },
+                        x: { grid: { display: false } }
                     }
                 };
 
+                // 概览页图表
                 charts.totalScore = new Chart(document.getElementById('totalScoreChart'), {
                     type: 'line',
                     data: { labels: [], datasets: [] },
-                    options: {
-                        ...chartConfig,
-                        plugins: {
-                            ...chartConfig.plugins,
-                            tooltip: { mode: 'index', intersect: false }
-                        }
-                    }
+                    options: { ...chartConfig, plugins: { ...chartConfig.plugins, tooltip: { mode: 'index', intersect: false } } }
                 });
 
                 charts.subjects = new Chart(document.getElementById('subjectsChart'), {
@@ -1375,39 +1473,20 @@
                 charts.mainSubjects = new Chart(document.getElementById('mainSubjectsChart'), {
                     type: 'line',
                     data: { labels: [], datasets: [] },
-                    options: {
-                        ...chartConfig,
-                        plugins: {
-                            ...chartConfig.plugins,
-                            tooltip: { mode: 'index', intersect: false }
-                        }
-                    }
+                    options: { ...chartConfig, plugins: { ...chartConfig.plugins, tooltip: { mode: 'index', intersect: false } } }
                 });
 
                 charts.rank = new Chart(document.getElementById('rankChart'), {
                     type: 'line',
                     data: { labels: [], datasets: [] },
-                    options: {
-                        ...chartConfig,
-                        indexAxis: 'y',
-                        plugins: {
-                            ...chartConfig.plugins,
-                            tooltip: { mode: 'index', intersect: false }
-                        }
-                    }
+                    options: { ...chartConfig, indexAxis: 'y', plugins: { ...chartConfig.plugins, tooltip: { mode: 'index', intersect: false } } }
                 });
 
                 // 数据分析页图表
                 charts.allSubjects = new Chart(document.getElementById('allSubjectsChart'), {
                     type: 'line',
                     data: { labels: [], datasets: [] },
-                    options: {
-                        ...chartConfig,
-                        plugins: {
-                            ...chartConfig.plugins,
-                            tooltip: { mode: 'index', intersect: false }
-                        }
-                    }
+                    options: { ...chartConfig, plugins: { ...chartConfig.plugins, tooltip: { mode: 'index', intersect: false } } }
                 });
 
                 charts.scoreDistribution = new Chart(document.getElementById('scoreDistributionChart'), {
@@ -1419,13 +1498,7 @@
                 charts.rankCompare = new Chart(document.getElementById('rankCompareChart'), {
                     type: 'line',
                     data: { labels: [], datasets: [] },
-                    options: {
-                        ...chartConfig,
-                        plugins: {
-                            ...chartConfig.plugins,
-                            tooltip: { mode: 'index', intersect: false }
-                        }
-                    }
+                    options: { ...chartConfig, plugins: { ...chartConfig.plugins, tooltip: { mode: 'index', intersect: false } } }
                 });
 
                 charts.mainVsSub = new Chart(document.getElementById('mainVsSubChart'), {
@@ -1435,6 +1508,9 @@
                 });
             }
 
+            /**
+             * 更新图表数据
+             */
             function updateCharts(data) {
                 if (!data || data.length === 0) {
                     Object.values(charts).forEach(chart => {
@@ -1467,12 +1543,11 @@
                 const latestData = sortedData[sortedData.length - 1];
                 const subjects = ['语文', '数学', '英语', '历史', '政治', '地理'];
                 const subjectKeys = ['chinese_score', 'math_score', 'english_score', 'history_score', 'politics_scaled_score', 'geography_scaled_score'];
-                const subjectData = subjectKeys.map(key => latestData[key] || null);
-
+                
                 charts.subjects.data.labels = subjects;
                 charts.subjects.data.datasets = [{
                     label: '最新成绩',
-                    data: subjectData,
+                    data: subjectKeys.map(key => latestData[key] || null),
                     backgroundColor: colors,
                     borderRadius: 6
                 }];
@@ -1481,54 +1556,18 @@
                 // 主科三科趋势
                 charts.mainSubjects.data.labels = labels;
                 charts.mainSubjects.data.datasets = [
-                    {
-                        label: '语文',
-                        data: sortedData.map(item => item.chinese_score || null),
-                        borderColor: '#4f46e5',
-                        tension: 0.3,
-                        pointRadius: 4
-                    },
-                    {
-                        label: '数学',
-                        data: sortedData.map(item => item.math_score || null),
-                        borderColor: '#f59e0b',
-                        tension: 0.3,
-                        pointRadius: 4
-                    },
-                    {
-                        label: '英语',
-                        data: sortedData.map(item => item.english_score || null),
-                        borderColor: '#10b981',
-                        tension: 0.3,
-                        pointRadius: 4
-                    }
+                    { label: '语文', data: sortedData.map(item => item.chinese_score || null), borderColor: '#4f46e5', tension: 0.3, pointRadius: 4 },
+                    { label: '数学', data: sortedData.map(item => item.math_score || null), borderColor: '#f59e0b', tension: 0.3, pointRadius: 4 },
+                    { label: '英语', data: sortedData.map(item => item.english_score || null), borderColor: '#10b981', tension: 0.3, pointRadius: 4 }
                 ];
                 charts.mainSubjects.update();
 
                 // 综合排名趋势
                 charts.rank.data.labels = labels;
                 charts.rank.data.datasets = [
-                    {
-                        label: '区排名',
-                        data: sortedData.map(item => item.rank_district || null),
-                        borderColor: '#4f46e5',
-                        tension: 0.3,
-                        pointRadius: 4
-                    },
-                    {
-                        label: '校排名',
-                        data: sortedData.map(item => item.rank_school || null),
-                        borderColor: '#f59e0b',
-                        tension: 0.3,
-                        pointRadius: 4
-                    },
-                    {
-                        label: '班排名',
-                        data: sortedData.map(item => item.rank_class || null),
-                        borderColor: '#10b981',
-                        tension: 0.3,
-                        pointRadius: 4
-                    }
+                    { label: '区排名', data: sortedData.map(item => item.rank_district || null), borderColor: '#4f46e5', tension: 0.3, pointRadius: 4 },
+                    { label: '校排名', data: sortedData.map(item => item.rank_school || null), borderColor: '#f59e0b', tension: 0.3, pointRadius: 4 },
+                    { label: '班排名', data: sortedData.map(item => item.rank_class || null), borderColor: '#10b981', tension: 0.3, pointRadius: 4 }
                 ];
                 charts.rank.update();
 
@@ -1551,6 +1590,7 @@
                     const [min, max] = range.split('-').map(Number);
                     return totalScores.filter(s => s >= min && s <= max).length;
                 });
+                
                 charts.scoreDistribution.data.labels = scoreRanges;
                 charts.scoreDistribution.data.datasets = [{
                     label: '人数',
@@ -1570,10 +1610,10 @@
                 charts.rankCompare.update();
 
                 // 数据分析页 - 主科与副科对比
-                const mainVsSubLabels = labels;
                 const mainScores = sortedData.map(item => parseFloat(item.main_subjects_score) || null);
                 const subScores = sortedData.map(item => parseFloat(item.three_subjects_sum) || null);
-                charts.mainVsSub.data.labels = mainVsSubLabels;
+                
+                charts.mainVsSub.data.labels = labels;
                 charts.mainVsSub.data.datasets = [
                     { label: '主科', data: mainScores, backgroundColor: '#4f46e5', borderRadius: 6 },
                     { label: '三科', data: subScores, backgroundColor: '#10b981', borderRadius: 6 }
@@ -1581,71 +1621,15 @@
                 charts.mainVsSub.update();
             }
 
-            // ============ 计算单条记录的总分 ============
-            function calculateRecordTotals(record) {
-                const chinese = parseFloat(record.chinese_score) || 0;
-                const math = parseFloat(record.math_score) || 0;
-                const english = parseFloat(record.english_score) || 0;
-                const history = parseFloat(record.history_score) || 0;
-                const politicsScaled = parseFloat(record.politics_scaled_score) || 0;
-                const geographyScaled = parseFloat(record.geography_scaled_score) || 0;
-                
-                const mainSum = chinese + math + english;
-                const threeSum = history + politicsScaled + geographyScaled;
-                const totalSum = mainSum + threeSum;
-                
-                return {
-                    main_subjects_score: mainSum > 0 ? mainSum.toFixed(1) : null,
-                    three_subjects_sum: threeSum > 0 ? threeSum.toFixed(1) : null,
-                    total_score: totalSum > 0 ? totalSum.toFixed(1) : null
-                };
-            }
-
-            // ============ 自动计算表单总分 ============
-            function calculateFormTotals() {
-                const totals = calculateRecordTotals({
-                    chinese_score: document.getElementById('chinese_score').value,
-                    math_score: document.getElementById('math_score').value,
-                    english_score: document.getElementById('english_score').value,
-                    history_score: document.getElementById('history_score').value,
-                    politics_scaled_score: document.getElementById('politics_scaled_score').value,
-                    geography_scaled_score: document.getElementById('geography_scaled_score').value
-                });
-                
-                if (totals.main_subjects_score) {
-                    document.getElementById('main_subjects_score').value = totals.main_subjects_score;
-                }
-                if (totals.three_subjects_sum) {
-                    document.getElementById('three_subjects_sum').value = totals.three_subjects_sum;
-                }
-                if (totals.total_score) {
-                    document.getElementById('total_score').value = totals.total_score;
-                }
-            }
-
-            function setupAutoCalculate() {
-                const subjectFields = [
-                    'chinese_score', 'math_score', 'english_score',
-                    'history_score', 'politics_scaled_score', 'geography_scaled_score'
-                ];
-                
-                subjectFields.forEach(field => {
-                    const el = document.getElementById(field);
-                    if (el) {
-                        el.addEventListener('input', calculateFormTotals);
-                        el.addEventListener('change', calculateFormTotals);
-                    }
-                });
-            }
-
             // ============ 模态框操作 ============
+            
             window.openAddModal = function() {
                 isEditMode = false;
-                modalTitle.textContent = '添加成绩记录';
-                editIdInput.value = '';
-                form.reset();
-                saveBtn.textContent = '保存记录';
-                modal.classList.add('active');
+                DOM.modalTitle.textContent = '添加成绩记录';
+                DOM.editIdInput.value = '';
+                DOM.form.reset();
+                DOM.saveBtn.textContent = '保存记录';
+                DOM.modal.classList.add('active');
                 setTimeout(() => {
                     document.getElementById('exam_type').focus();
                 }, 150);
@@ -1653,77 +1637,83 @@
 
             window.editRecord = async function(id) {
                 isEditMode = true;
-                modalTitle.textContent = '编辑成绩记录';
-                editIdInput.value = id;
-                saveBtn.textContent = '更新记录';
+                DOM.modalTitle.textContent = '编辑成绩记录';
+                DOM.editIdInput.value = id;
+                DOM.saveBtn.textContent = '更新记录';
 
-                // 先显示加载状态
-                modal.classList.add('active');
+                DOM.modal.classList.add('active');
 
-                const { data, error } = await supabaseClient
-                    .from(TABLE_NAME)
-                    .select('*')
-                    .eq('id', id)
-                    .single();
+                try {
+                    const { data, error } = await supabaseClient
+                        .from(TABLE_NAME)
+                        .select('*')
+                        .eq('id', id)
+                        .single();
 
-                if (error) {
+                    if (error || !data) {
+                        throw new Error(error?.message || '未找到该记录');
+                    }
+
+                    const fields = [
+                        'exam_type', 'total_score', 'rank_district', 'rank_school', 'rank_class',
+                        'main_subjects_score',
+                        'chinese_score', 'chinese_rank_district', 'chinese_rank_school', 'chinese_rank_class',
+                        'math_score', 'math_rank_district', 'math_rank_school', 'math_rank_class',
+                        'english_score', 'english_rank_district', 'english_rank_school', 'english_rank_class',
+                        'three_subjects_sum',
+                        'history_score', 'history_rank_district', 'history_rank_school', 'history_rank_class',
+                        'politics_score', 'politics_scaled_score', 'politics_rank_district', 'politics_rank_school', 'politics_rank_class',
+                        'geography_score', 'geography_scaled_score', 'geography_rank_district', 'geography_rank_school', 'geography_rank_class'
+                    ];
+
+                    fields.forEach(field => {
+                        const el = document.getElementById(field);
+                        if (el) {
+                            el.value = data[field] || '';
+                        }
+                    });
+
+                } catch (error) {
                     showToast('获取数据失败: ' + error.message, 'error');
                     closeModal();
-                    return;
                 }
+            };
 
-                if (!data) {
-                    showToast('未找到该记录', 'error');
-                    closeModal();
-                    return;
+            window.deleteRecord = async function(id) {
+                if (!confirm('确定要删除这条记录吗？')) return;
+
+                try {
+                    const { error } = await supabaseClient.from(TABLE_NAME).delete().eq('id', id);
+                    if (error) throw error;
+
+                    showToast('删除成功');
+                    fetchData();
+
+                } catch (error) {
+                    showToast('删除失败: ' + error.message, 'error');
                 }
-
-                // 填充表单
-                const fields = [
-                    'exam_type', 'total_score', 'rank_district', 'rank_school', 'rank_class',
-                    'main_subjects_score',
-                    'chinese_score', 'chinese_rank_district', 'chinese_rank_school', 'chinese_rank_class',
-                    'math_score', 'math_rank_district', 'math_rank_school', 'math_rank_class',
-                    'english_score', 'english_rank_district', 'english_rank_school', 'english_rank_class',
-                    'three_subjects_sum',
-                    'history_score', 'history_rank_district', 'history_rank_school', 'history_rank_class',
-                    'politics_score', 'politics_scaled_score', 'politics_rank_district', 'politics_rank_school',
-                    'politics_rank_class',
-                    'geography_score', 'geography_scaled_score', 'geography_rank_district', 'geography_rank_school',
-                    'geography_rank_class'
-                ];
-
-                fields.forEach(field => {
-                    const el = document.getElementById(field);
-                    if (el) {
-                        const val = data[field];
-                        el.value = (val !== null && val !== undefined) ? val : '';
-                    }
-                });
             };
 
             window.closeModal = function() {
-                modal.classList.remove('active');
-                // 清理表单
-                form.reset();
-                editIdInput.value = '';
+                DOM.modal.classList.remove('active');
+                DOM.form.reset();
+                DOM.editIdInput.value = '';
             };
 
-            // 点击遮罩关闭
-            modal.addEventListener('click', function(e) {
-                if (e.target === modal) {
+            DOM.modal.addEventListener('click', function(e) {
+                if (e.target === DOM.modal) {
                     closeModal();
                 }
             });
 
-            // ESC 关闭
             document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape' && modal.classList.contains('active')) {
+                if (e.key === 'Escape' && DOM.modal.classList.contains('active')) {
                     closeModal();
                 }
             });
 
             // ============ 保存记录 ============
+            
             window.saveRecord = async function() {
                 const examType = document.getElementById('exam_type').value.trim();
                 if (!examType) {
@@ -1732,7 +1722,6 @@
                     return;
                 }
 
-                // 收集表单数据
                 const numericFields = [
                     'total_score', 'rank_district', 'rank_school', 'rank_class', 'main_subjects_score',
                     'chinese_score', 'chinese_rank_district', 'chinese_rank_school', 'chinese_rank_class',
@@ -1740,85 +1729,52 @@
                     'english_score', 'english_rank_district', 'english_rank_school', 'english_rank_class',
                     'three_subjects_sum',
                     'history_score', 'history_rank_district', 'history_rank_school', 'history_rank_class',
-                    'politics_score', 'politics_scaled_score', 'politics_rank_district', 'politics_rank_school',
-                    'politics_rank_class',
-                    'geography_score', 'geography_scaled_score', 'geography_rank_district', 'geography_rank_school',
-                    'geography_rank_class'
+                    'politics_score', 'politics_scaled_score', 'politics_rank_district', 'politics_rank_school', 'politics_rank_class',
+                    'geography_score', 'geography_scaled_score', 'geography_rank_district', 'geography_rank_school', 'geography_rank_class'
                 ];
 
-                const data = {};
-                // 考试类型
-                data['exam_type'] = examType;
-
-                // 数值字段
+                const data = { exam_type: examType };
+                
                 numericFields.forEach(field => {
                     const el = document.getElementById(field);
-                    if (el && el.value.trim() !== '') {
+                    if (el && el.value !== '') {
                         const val = parseFloat(el.value);
                         if (!isNaN(val)) {
                             data[field] = val;
                         }
                     }
-                    // 如果为空则不传该字段（让数据库保持 null）
                 });
 
-                const editId = editIdInput.value;
-                saveBtn.textContent = '保存中...';
-                saveBtn.disabled = true;
-
-                let error = null;
-                if (editId) {
-                    const result = await supabaseClient.from(TABLE_NAME).update(data).eq('id', editId);
-                    error = result.error;
-                } else {
-                    const result = await supabaseClient.from(TABLE_NAME).insert(data);
-                    error = result.error;
-                }
-
-                saveBtn.textContent = '保存记录';
-                saveBtn.disabled = false;
-
-                if (error) {
-                    showToast('保存失败: ' + error.message, 'error');
-                    console.error('保存失败:', error);
-                } else {
+                try {
+                    if (isEditMode) {
+                        const { error } = await supabaseClient
+                            .from(TABLE_NAME)
+                            .update(data)
+                            .eq('id', DOM.editIdInput.value);
+                        if (error) throw error;
+                        showToast('更新成功');
+                    } else {
+                        const { error } = await supabaseClient.from(TABLE_NAME).insert([data]);
+                        if (error) throw error;
+                        showToast('添加成功');
+                    }
+                    
                     closeModal();
-                    await fetchData();
-                    showToast(editId ? '记录已更新' : '记录已添加', 'success');
+                    fetchData();
+                } catch (error) {
+                    showToast('保存失败: ' + error.message, 'error');
                 }
-            };
-
-            // ============ 删除记录 ============
-            window.deleteRecord = async function(id) {
-                if (!confirm('⚠️ 确定要删除这条成绩记录吗？\n\n此操作不可恢复。')) return;
-
-                const { error } = await supabaseClient.from(TABLE_NAME).delete().eq('id', id);
-                if (error) {
-                    showToast('删除失败: ' + error.message, 'error');
-                    console.error('删除失败:', error);
-                } else {
-                    showToast('记录已删除', 'success');
-                    await fetchData();
-                }
-            };
-
-            // ============ 刷新数据 ============
-            window.refreshData = function() {
-                fetchData();
-                showToast('数据已刷新', '');
             };
 
             // ============ 表单回车提交 ============
-            form.addEventListener('keydown', function(e) {
+            DOM.form.addEventListener('keydown', function(e) {
                 if (e.key === 'Enter' && !e.shiftKey && e.target.tagName === 'INPUT') {
                     e.preventDefault();
-                    // 找到下一个输入框并聚焦
-                    const inputs = Array.from(form.querySelectorAll('input:not([type="hidden"])'));
+                    const inputs = Array.from(DOM.form.querySelectorAll('input:not([type="hidden"])'));
                     const currentIndex = inputs.indexOf(e.target);
                     if (currentIndex < inputs.length - 1) {
                         inputs[currentIndex + 1].focus();
                     } else {
-                        // 最后一个输入框，触发保存
                         window.saveRecord();
                     }
                 }
