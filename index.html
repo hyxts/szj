@@ -138,33 +138,32 @@
             align-items: center;
         }
         .countdown {
-            color: var(--text-muted);
-            font-size: 13px;
-            font-weight: 500;
             display: flex;
             align-items: center;
-            gap: 4px;
-        }
-        .countdown-year {
-            font-size: 14px;
-            font-weight: 600;
-            color: #1e40af;
-            min-width: 36px;
-            text-align: center;
-        }
-        .countdown-days {
-            font-size: 16px;
-            font-weight: 600;
-            color: var(--text-main);
-            min-width: 24px;
-            text-align: center;
+            gap: 8px;
+            padding: 4px 10px;
+            background: rgba(239, 68, 68, 0.08);
+            border-radius: 16px;
+            font-size: 13px;
         }
         .countdown-label {
+            color: #ef4444;
+            font-weight: 500;
             font-size: 12px;
+        }
+        .countdown-value {
+            display: flex;
+            align-items: baseline;
+            gap: 2px;
+        }
+        #countdownDays {
+            font-size: 18px;
+            font-weight: 700;
+            color: #ef4444;
         }
         .countdown-unit {
             font-size: 12px;
-            color: var(--text-subtle);
+            color: #ef4444;
         }
 
         /* ========== 按钮 ========== */
@@ -587,22 +586,18 @@
                 gap: 8px;
             }
             .countdown {
-                font-size: 12px;
-                gap: 3px;
-            }
-            .countdown-year {
-                font-size: 13px;
-                min-width: 32px;
-            }
-            .countdown-days {
-                font-size: 14px;
-                min-width: 20px;
+                padding: 3px 8px;
+                gap: 6px;
+                font-size: 11px;
             }
             .countdown-label {
-                font-size: 11px;
+                font-size: 10px;
+            }
+            #countdownDays {
+                font-size: 15px;
             }
             .countdown-unit {
-                font-size: 11px;
+                font-size: 10px;
             }
             h1 {
                 font-size: 18px;
@@ -729,10 +724,11 @@
             </div>
             <div class="nav-actions">
                 <div class="countdown" id="gaokaoCountdown">
-                    <span class="countdown-label">距高考</span>
-                    <span class="countdown-year" id="countdownYear">—</span>
-                    <span class="countdown-days" id="countdownDays">—</span>
-                    <span class="countdown-unit">天</span>
+                    <span class="countdown-label">高考倒计时</span>
+                    <span class="countdown-value">
+                        <span id="countdownDays">—</span>
+                        <span class="countdown-unit">天</span>
+                    </span>
                 </div>
             </div>
             <button class="mobile-nav-toggle" id="mobileNavToggle" onclick="toggleMobileNav()">≡</button>
@@ -1180,21 +1176,16 @@
             // ============ 高考倒计时 ============
             
             function updateGaokaoCountdown() {
-                const yearEl = document.getElementById('countdownYear');
                 const daysEl = document.getElementById('countdownDays');
-                if (!yearEl || !daysEl) return;
+                if (!daysEl) return;
 
                 const now = new Date();
                 const currentYear = now.getFullYear();
-                let gaokaoYear = currentYear;
                 let gaokaoDate = new Date(currentYear, 5, 7);
 
                 if (now > gaokaoDate) {
-                    gaokaoYear = currentYear + 1;
-                    gaokaoDate = new Date(gaokaoYear, 5, 7);
+                    gaokaoDate = new Date(currentYear + 1, 5, 7);
                 }
-
-                yearEl.textContent = gaokaoYear;
 
                 const diff = gaokaoDate - now;
                 const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
@@ -1202,7 +1193,7 @@
                 if (days > 0) {
                     daysEl.textContent = days;
                 } else if (days === 0) {
-                    daysEl.textContent = '今天!';
+                    daysEl.textContent = '今天';
                 } else {
                     daysEl.textContent = '考试中';
                 }
