@@ -1128,9 +1128,17 @@
                     return;
                 }
 
-                renderTable(data);
-                updateStats(data);
-                updateCharts(data);
+                const calculatedData = data.map(record => {
+                    const totals = calculateRecordTotals(record);
+                    return {
+                        ...record,
+                        ...totals
+                    };
+                });
+
+                renderTable(calculatedData);
+                updateStats(calculatedData);
+                updateCharts(calculatedData);
                 tableInfo.textContent = `共 ${data.length} 条记录 - 通过 Supabase 同步`;
                 document.getElementById('chartInfo').textContent = data.length >= 2 ? `基于 ${data.length} 次考试数据生成` : '请添加至少2次考试记录以生成图表';
             }
@@ -1413,6 +1421,63 @@
                 charts.rank.update();
             }
 
+            // ============ 计算单条记录的总分 ============
+            function calculateRecordTotals(record) {
+                const chinese = parseFloat(record.chinese_score) || 0;
+                const math = parseFloat(record.math_score) || 0;
+                const english = parseFloat(record.english_score) || 0;
+                const history = parseFloat(record.history_score) || 0;
+                const politicsScaled = parseFloat(record.politics_scaled_score) || 0;
+                const geographyScaled = parseFloat(record.geography_scaled_score) || 0;
+                
+                const mainSum = chinese + math + english;
+                const threeSum = history + politicsScaled + geographyScaled;
+                const totalSum = mainSum + threeSum;
+                
+                return {
+                    main_subjects_score: mainSum > 0 ? mainSum.toFixed(1) : null,
+                    three_subjects_sum: threeSum > 0 ? threeSum.toFixed(1) : null,
+                    total_score: totalSum > 0 ? totalSum.toFixed(1) : null
+                };
+            }
+
+            // ============ 自动计算表单总分 ============
+            function calculateFormTotals() {
+                const totals = calculateRecordTotals({
+                    chinese_score: document.getElementById('chinese_score').value,
+                    math_score: document.getElementById('math_score').value,
+                    english_score: document.getElementById('english_score').value,
+                    history_score: document.getElementById('history_score').value,
+                    politics_scaled_score: document.getElementById('politics_scaled_score').value,
+                    geography_scaled_score: document.getElementById('geography_scaled_score').value
+                });
+                
+                if (totals.main_subjects_score) {
+                    document.getElementById('main_subjects_score').value = totals.main_subjects_score;
+                }
+                if (totals.three_subjects_sum) {
+                    document.getElementById('three_subjects_sum').value = totals.three_subjects_sum;
+                }
+                if (totals.total_score) {
+                    document.getElementById('total_score').value = totals.total_score;
+                }
+            }
+
+            function setupAutoCalculate() {
+                const subjectFields = [
+                    'chinese_score', 'math_score', 'english_score',
+                    'history_score', 'politics_scaled_score', 'geography_scaled_score'
+                ];
+                
+                subjectFields.forEach(field => {
+                    const el = document.getElementById(field);
+                    if (el) {
+                        el.addEventListener('input', calculateFormTotals);
+                        el.addEventListener('change', calculateFormTotals);
+                    }
+                });
+            }
+
             // ============ 模态框操作 ============
             window.openAddModal = function() {
                 isEditMode = false;
@@ -1602,6 +1667,7 @@
             // ============ 初始化 ============
             setupNavListeners();
             initCharts();
+            setupAutoCalculate();
             fetchData();
             startCountdownTimer();
         })();
