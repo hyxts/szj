@@ -1462,35 +1462,44 @@
              * 更新统计数据
              */
             function updateStats(data) {
-                const totalEl = document.getElementById('totalRecords');
-                const avgEl = document.getElementById('avgScore');
-                const maxEl = document.getElementById('maxScore');
+                try {
+                    const totalEl = document.getElementById('totalRecords');
+                    const avgEl = document.getElementById('avgScore');
+                    const maxEl = document.getElementById('maxScore');
 
-                if (!data || data.length === 0) {
-                    totalEl.textContent = '0';
-                    avgEl.textContent = '—';
-                    maxEl.textContent = '—';
-                    updateStatsTable([]);
-                    return;
-                }
-
-                totalEl.textContent = data.length;
-
-                let totalSum = 0, count = 0, maxS = -Infinity;
-                data.forEach(row => {
-                    if (row.total_score !== null && row.total_score !== undefined && row.total_score !== '') {
-                        const val = parseFloat(row.total_score);
-                        if (!isNaN(val)) {
-                            totalSum += val;
-                            count++;
-                            if (val > maxS) maxS = val;
-                        }
+                    if (!totalEl || !avgEl || !maxEl) {
+                        updateStatsTable([]);
+                        return;
                     }
-                });
 
-                avgEl.textContent = count > 0 ? (totalSum / count).toFixed(1) : '—';
-                maxEl.textContent = maxS > -Infinity ? maxS : '—';
-                updateStatsTable(data);
+                    if (!data || data.length === 0) {
+                        totalEl.textContent = '0';
+                        avgEl.textContent = '—';
+                        maxEl.textContent = '—';
+                        updateStatsTable([]);
+                        return;
+                    }
+
+                    totalEl.textContent = data.length;
+
+                    let totalSum = 0, count = 0, maxS = -Infinity;
+                    data.forEach(row => {
+                        if (row.total_score !== null && row.total_score !== undefined && row.total_score !== '') {
+                            const val = parseFloat(row.total_score);
+                            if (!isNaN(val)) {
+                                totalSum += val;
+                                count++;
+                                if (val > maxS) maxS = val;
+                            }
+                        }
+                    });
+
+                    avgEl.textContent = count > 0 ? (totalSum / count).toFixed(1) : '—';
+                    maxEl.textContent = maxS > -Infinity ? maxS : '—';
+                    updateStatsTable(data);
+                } catch (e) {
+                    console.warn('统计更新失败:', e);
+                }
             }
 
             /**
@@ -1572,66 +1581,75 @@
                     }
                 };
 
+                // 安全地初始化图表函数
+                function safeInitChart(id, type, options = {}) {
+                    const el = document.getElementById(id);
+                    if (!el) return null;
+                    try {
+                        return new Chart(el, {
+                            type: type,
+                            data: { labels: [], datasets: [] },
+                            options: { ...chartConfig, ...options }
+                        });
+                    } catch (e) {
+                        console.warn('图表初始化失败:', id, e);
+                        return null;
+                    }
+                }
+
                 // 概览页图表
-                charts.totalScore = new Chart(document.getElementById('totalScoreChart'), {
-                    type: 'line',
-                    data: { labels: [], datasets: [] },
-                    options: { ...chartConfig, plugins: { ...chartConfig.plugins, tooltip: { mode: 'index', intersect: false } } }
+                charts.totalScore = safeInitChart('totalScoreChart', 'line', {
+                    plugins: { ...chartConfig.plugins, tooltip: { mode: 'index', intersect: false } }
                 });
 
-                charts.subjects = new Chart(document.getElementById('subjectsChart'), {
-                    type: 'bar',
-                    data: { labels: [], datasets: [] },
-                    options: chartConfig
+                charts.subjects = safeInitChart('subjectsChart', 'bar');
+
+                charts.mainSubjects = safeInitChart('mainSubjectsChart', 'line', {
+                    plugins: { ...chartConfig.plugins, tooltip: { mode: 'index', intersect: false } }
                 });
 
-                charts.mainSubjects = new Chart(document.getElementById('mainSubjectsChart'), {
-                    type: 'line',
-                    data: { labels: [], datasets: [] },
-                    options: { ...chartConfig, plugins: { ...chartConfig.plugins, tooltip: { mode: 'index', intersect: false } } }
-                });
-
-                charts.rank = new Chart(document.getElementById('rankChart'), {
-                    type: 'line',
-                    data: { labels: [], datasets: [] },
-                    options: { ...chartConfig, indexAxis: 'y', plugins: { ...chartConfig.plugins, tooltip: { mode: 'index', intersect: false } } }
+                charts.rank = safeInitChart('rankChart', 'line', {
+                    indexAxis: 'y',
+                    plugins: { ...chartConfig.plugins, tooltip: { mode: 'index', intersect: false } }
                 });
 
                 // 数据分析页图表
-                charts.allSubjects = new Chart(document.getElementById('allSubjectsChart'), {
-                    type: 'line',
-                    data: { labels: [], datasets: [] },
-                    options: { ...chartConfig, plugins: { ...chartConfig.plugins, tooltip: { mode: 'index', intersect: false } } }
+                charts.allSubjects = safeInitChart('allSubjectsChart', 'line', {
+                    plugins: { ...chartConfig.plugins, tooltip: { mode: 'index', intersect: false } }
                 });
 
-                charts.scoreDistribution = new Chart(document.getElementById('scoreDistributionChart'), {
-                    type: 'bar',
-                    data: { labels: [], datasets: [] },
-                    options: chartConfig
+                charts.scoreDistribution = safeInitChart('scoreDistributionChart', 'bar');
+
+                charts.rankCompare = safeInitChart('rankCompareChart', 'line', {
+                    plugins: { ...chartConfig.plugins, tooltip: { mode: 'index', intersect: false } }
                 });
 
-                charts.rankCompare = new Chart(document.getElementById('rankCompareChart'), {
-                    type: 'line',
-                    data: { labels: [], datasets: [] },
-                    options: { ...chartConfig, plugins: { ...chartConfig.plugins, tooltip: { mode: 'index', intersect: false } } }
-                });
-
-                charts.mainVsSub = new Chart(document.getElementById('mainVsSubChart'), {
-                    type: 'bar',
-                    data: { labels: [], datasets: [] },
-                    options: chartConfig
-                });
+                charts.mainVsSub = safeInitChart('mainVsSubChart', 'bar');
             }
 
             /**
              * 更新图表数据
              */
             function updateCharts(data) {
+                // 安全地更新图表
+                function safeUpdateChart(chart, dataFn) {
+                    if (!chart) return;
+                    try {
+                        dataFn(chart);
+                        chart.update();
+                    } catch (e) {
+                        console.warn('图表更新失败:', e);
+                    }
+                }
+
                 if (!data || data.length === 0) {
                     Object.values(charts).forEach(chart => {
-                        chart.data.labels = [];
-                        chart.data.datasets = [];
-                        chart.update();
+                        if (chart) {
+                            safeUpdateChart(chart, (c) => {
+                                c.data.labels = [];
+                                c.data.datasets = [];
+                            });
+                        }
                     });
                     return;
                 }
@@ -1641,62 +1659,67 @@
                 const colors = ['#4f46e5', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6', '#ec4899'];
 
                 // 总分趋势
-                charts.totalScore.data.labels = labels;
-                charts.totalScore.data.datasets = [{
-                    label: '总分',
-                    data: sortedData.map(item => item.total_score || null),
-                    borderColor: '#4f46e5',
-                    backgroundColor: 'rgba(79, 70, 229, 0.1)',
-                    fill: true,
-                    tension: 0.3,
-                    pointRadius: 5,
-                    pointHoverRadius: 7
-                }];
-                charts.totalScore.update();
+                safeUpdateChart(charts.totalScore, (c) => {
+                    c.data.labels = labels;
+                    c.data.datasets = [{
+                        label: '总分',
+                        data: sortedData.map(item => item.total_score || null),
+                        borderColor: '#4f46e5',
+                        backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 5,
+                        pointHoverRadius: 7
+                    }];
+                });
 
                 // 各科成绩对比（最新一次考试）
                 const latestData = sortedData[sortedData.length - 1];
                 const subjects = ['语文', '数学', '英语', '历史', '政治', '地理'];
                 const subjectKeys = ['chinese_score', 'math_score', 'english_score', 'history_score', 'politics_scaled_score', 'geography_scaled_score'];
                 
-                charts.subjects.data.labels = subjects;
-                charts.subjects.data.datasets = [{
-                    label: '最新成绩',
-                    data: subjectKeys.map(key => latestData[key] || null),
-                    backgroundColor: colors,
-                    borderRadius: 6
-                }];
-                charts.subjects.update();
+                safeUpdateChart(charts.subjects, (c) => {
+                    c.data.labels = subjects;
+                    c.data.datasets = [{
+                        label: '最新成绩',
+                        data: subjectKeys.map(key => latestData[key] || null),
+                        backgroundColor: colors,
+                        borderRadius: 6
+                    }];
+                });
 
                 // 主科三科趋势
-                charts.mainSubjects.data.labels = labels;
-                charts.mainSubjects.data.datasets = [
-                    { label: '语文', data: sortedData.map(item => item.chinese_score || null), borderColor: '#4f46e5', tension: 0.3, pointRadius: 4 },
-                    { label: '数学', data: sortedData.map(item => item.math_score || null), borderColor: '#f59e0b', tension: 0.3, pointRadius: 4 },
-                    { label: '英语', data: sortedData.map(item => item.english_score || null), borderColor: '#10b981', tension: 0.3, pointRadius: 4 }
-                ];
-                charts.mainSubjects.update();
+                safeUpdateChart(charts.mainSubjects, (c) => {
+                    c.data.labels = labels;
+                    c.data.datasets = [
+                        { label: '语文', data: sortedData.map(item => item.chinese_score || null), borderColor: '#4f46e5', tension: 0.3, pointRadius: 4 },
+                        { label: '数学', data: sortedData.map(item => item.math_score || null), borderColor: '#f59e0b', tension: 0.3, pointRadius: 4 },
+                        { label: '英语', data: sortedData.map(item => item.english_score || null), borderColor: '#10b981', tension: 0.3, pointRadius: 4 }
+                    ];
+                });
 
                 // 综合排名趋势
-                charts.rank.data.labels = labels;
-                charts.rank.data.datasets = [
-                    { label: '区排名', data: sortedData.map(item => item.rank_district || null), borderColor: '#4f46e5', tension: 0.3, pointRadius: 4 },
-                    { label: '校排名', data: sortedData.map(item => item.rank_school || null), borderColor: '#f59e0b', tension: 0.3, pointRadius: 4 },
-                    { label: '班排名', data: sortedData.map(item => item.rank_class || null), borderColor: '#10b981', tension: 0.3, pointRadius: 4 }
-                ];
-                charts.rank.update();
+                safeUpdateChart(charts.rank, (c) => {
+                    c.data.labels = labels;
+                    c.data.datasets = [
+                        { label: '区排名', data: sortedData.map(item => item.rank_district || null), borderColor: '#4f46e5', tension: 0.3, pointRadius: 4 },
+                        { label: '校排名', data: sortedData.map(item => item.rank_school || null), borderColor: '#f59e0b', tension: 0.3, pointRadius: 4 },
+                        { label: '班排名', data: sortedData.map(item => item.rank_class || null), borderColor: '#10b981', tension: 0.3, pointRadius: 4 }
+                    ];
+                });
 
                 // 数据分析页 - 各科成绩趋势
-                charts.allSubjects.data.labels = labels;
-                charts.allSubjects.data.datasets = [
-                    { label: '语文', data: sortedData.map(item => item.chinese_score || null), borderColor: '#4f46e5', tension: 0.3, pointRadius: 4 },
-                    { label: '数学', data: sortedData.map(item => item.math_score || null), borderColor: '#f59e0b', tension: 0.3, pointRadius: 4 },
-                    { label: '英语', data: sortedData.map(item => item.english_score || null), borderColor: '#10b981', tension: 0.3, pointRadius: 4 },
-                    { label: '历史', data: sortedData.map(item => item.history_score || null), borderColor: '#ef4444', tension: 0.3, pointRadius: 4 },
-                    { label: '政治', data: sortedData.map(item => item.politics_scaled_score || null), borderColor: '#8b5cf6', tension: 0.3, pointRadius: 4 },
-                    { label: '地理', data: sortedData.map(item => item.geography_scaled_score || null), borderColor: '#ec4899', tension: 0.3, pointRadius: 4 }
-                ];
-                charts.allSubjects.update();
+                safeUpdateChart(charts.allSubjects, (c) => {
+                    c.data.labels = labels;
+                    c.data.datasets = [
+                        { label: '语文', data: sortedData.map(item => item.chinese_score || null), borderColor: '#4f46e5', tension: 0.3, pointRadius: 4 },
+                        { label: '数学', data: sortedData.map(item => item.math_score || null), borderColor: '#f59e0b', tension: 0.3, pointRadius: 4 },
+                        { label: '英语', data: sortedData.map(item => item.english_score || null), borderColor: '#10b981', tension: 0.3, pointRadius: 4 },
+                        { label: '历史', data: sortedData.map(item => item.history_score || null), borderColor: '#ef4444', tension: 0.3, pointRadius: 4 },
+                        { label: '政治', data: sortedData.map(item => item.politics_scaled_score || null), borderColor: '#8b5cf6', tension: 0.3, pointRadius: 4 },
+                        { label: '地理', data: sortedData.map(item => item.geography_scaled_score || null), borderColor: '#ec4899', tension: 0.3, pointRadius: 4 }
+                    ];
+                });
 
                 // 数据分析页 - 成绩分布
                 const scoreRanges = ['0-50', '51-60', '61-70', '71-80', '81-90', '91-100'];
@@ -1706,34 +1729,37 @@
                     return totalScores.filter(s => s >= min && s <= max).length;
                 });
                 
-                charts.scoreDistribution.data.labels = scoreRanges;
-                charts.scoreDistribution.data.datasets = [{
-                    label: '人数',
-                    data: distribution,
-                    backgroundColor: 'rgba(79, 70, 229, 0.7)',
-                    borderRadius: 6
-                }];
-                charts.scoreDistribution.update();
+                safeUpdateChart(charts.scoreDistribution, (c) => {
+                    c.data.labels = scoreRanges;
+                    c.data.datasets = [{
+                        label: '人数',
+                        data: distribution,
+                        backgroundColor: 'rgba(79, 70, 229, 0.7)',
+                        borderRadius: 6
+                    }];
+                });
 
                 // 数据分析页 - 排名变化对比
-                charts.rankCompare.data.labels = labels;
-                charts.rankCompare.data.datasets = [
-                    { label: '区排名', data: sortedData.map(item => item.rank_district || null), borderColor: '#4f46e5', tension: 0.3, pointRadius: 4 },
-                    { label: '校排名', data: sortedData.map(item => item.rank_school || null), borderColor: '#f59e0b', tension: 0.3, pointRadius: 4 },
-                    { label: '班排名', data: sortedData.map(item => item.rank_class || null), borderColor: '#10b981', tension: 0.3, pointRadius: 4 }
-                ];
-                charts.rankCompare.update();
+                safeUpdateChart(charts.rankCompare, (c) => {
+                    c.data.labels = labels;
+                    c.data.datasets = [
+                        { label: '区排名', data: sortedData.map(item => item.rank_district || null), borderColor: '#4f46e5', tension: 0.3, pointRadius: 4 },
+                        { label: '校排名', data: sortedData.map(item => item.rank_school || null), borderColor: '#f59e0b', tension: 0.3, pointRadius: 4 },
+                        { label: '班排名', data: sortedData.map(item => item.rank_class || null), borderColor: '#10b981', tension: 0.3, pointRadius: 4 }
+                    ];
+                });
 
                 // 数据分析页 - 主科与副科对比
                 const mainScores = sortedData.map(item => parseFloat(item.main_subjects_score) || null);
                 const subScores = sortedData.map(item => parseFloat(item.three_subjects_sum) || null);
                 
-                charts.mainVsSub.data.labels = labels;
-                charts.mainVsSub.data.datasets = [
-                    { label: '主科', data: mainScores, backgroundColor: '#4f46e5', borderRadius: 6 },
-                    { label: '三科', data: subScores, backgroundColor: '#10b981', borderRadius: 6 }
-                ];
-                charts.mainVsSub.update();
+                safeUpdateChart(charts.mainVsSub, (c) => {
+                    c.data.labels = labels;
+                    c.data.datasets = [
+                        { label: '主科', data: mainScores, backgroundColor: '#4f46e5', borderRadius: 6 },
+                        { label: '三科', data: subScores, backgroundColor: '#10b981', borderRadius: 6 }
+                    ];
+                });
             }
 
             // ============ 模态框操作 ============
@@ -1900,11 +1926,36 @@
             });
 
             // ============ 初始化 ============
-            setupNavListeners();
-            initCharts();
-            setupAutoCalculate();
-            fetchData();
-            startCountdownTimer();
+            try {
+                setupNavListeners();
+            } catch (e) {
+                console.warn('导航监听器初始化失败:', e);
+            }
+            
+            try {
+                initCharts();
+            } catch (e) {
+                console.warn('图表初始化失败:', e);
+            }
+            
+            try {
+                setupAutoCalculate();
+            } catch (e) {
+                console.warn('自动计算初始化失败:', e);
+            }
+            
+            try {
+                fetchData();
+            } catch (e) {
+                console.warn('数据加载失败:', e);
+                showToast('数据加载失败，请刷新页面重试', 'error');
+            }
+            
+            try {
+                startCountdownTimer();
+            } catch (e) {
+                console.warn('倒计时初始化失败:', e);
+            }
         })();
     </script>
 </body>
