@@ -531,6 +531,15 @@
         }
 
         /* ========== 响应式布局 ========== */
+        @media (max-width: 1024px) {
+            .chart-grid {
+                grid-template-columns: 1fr;
+            }
+            .table-wrapper {
+                overflow-x: auto;
+            }
+        }
+
         @media (max-width: 768px) {
             .nav-menu {
                 display: none;
@@ -542,17 +551,24 @@
                 flex-direction: column;
                 padding: 10px 20px;
                 box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-                gap: 0;
+                gap: 4px;
+                z-index: 800;
             }
             .nav-menu.mobile-active {
                 display: flex;
             }
             .nav-item {
-                padding: 12px 10px;
+                padding: 12px 14px;
                 border-radius: var(--radius-sm);
+                margin: 2px 0;
+            }
+            .nav-item:hover,
+            .nav-item.active {
+                background: rgba(30, 64, 175, 0.08);
             }
             .mobile-nav-toggle {
                 display: flex;
+                padding: 6px;
             }
             .nav-actions {
                 gap: 8px;
@@ -575,23 +591,31 @@
                 gap: 10px;
             }
             .stat-card {
-                padding: 12px 10px;
+                padding: 14px 12px;
+                text-align: center;
             }
             .stat-value {
                 font-size: 20px;
             }
             .stat-label {
-                font-size: 10px;
+                font-size: 11px;
             }
             table {
                 font-size: 12px;
+                min-width: 800px;
             }
             thead th {
                 padding: 10px 6px;
                 font-size: 10px;
+                white-space: nowrap;
             }
             tbody td {
                 padding: 8px 6px;
+                white-space: nowrap;
+            }
+            .actions-cell {
+                flex-direction: column;
+                gap: 4px;
             }
             .form-grid {
                 grid-template-columns: 1fr;
@@ -599,6 +623,15 @@
             .form-full,
             .form-section-title {
                 grid-column: span 1;
+            }
+            .modal {
+                width: 100%;
+                max-width: none;
+                margin: 10px;
+                max-height: calc(100vh - 20px);
+            }
+            .modal-body {
+                max-height: calc(100vh - 140px);
             }
         }
 
@@ -613,18 +646,50 @@
             .stat-value {
                 font-size: 18px;
             }
+            .stat-label {
+                font-size: 10px;
+            }
             .header-actions {
                 gap: 6px;
             }
             .btn {
-                font-size: 13px;
+                font-size: 12px;
                 padding: 3px 6px;
             }
             .nav-container {
                 padding: 0 12px;
             }
             .container {
+                padding: 10px;
+            }
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .header-actions {
+                margin-top: 8px;
+            }
+            .chart-container {
                 padding: 12px;
+            }
+            .chart-card {
+                padding: 12px;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+            .stat-card:last-child {
+                grid-column: span 2;
+            }
+            .countdown {
+                display: none;
+            }
+            .nav-brand {
+                font-size: 15px;
             }
         }
     </style>
