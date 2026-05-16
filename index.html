@@ -1264,6 +1264,68 @@
 
                 avgEl.textContent = count > 0 ? (totalSum / count).toFixed(1) : '—';
                 maxEl.textContent = maxS > -Infinity ? maxS : '—';
+                updateStatsTable(data);
+            }
+
+            function updateStatsTable(data) {
+                const statsTableBody = document.getElementById('statsTableBody');
+                if (!statsTableBody) return;
+
+                if (!data || data.length === 0) {
+                    statsTableBody.innerHTML = `
+                        <tr>
+                            <td colspan="5" class="empty-state">暂无数据</td>
+                        </tr>`;
+                    return;
+                }
+
+                const subjects = [
+                    { name: '语文', field: 'chinese_score' },
+                    { name: '数学', field: 'math_score' },
+                    { name: '英语', field: 'english_score' },
+                    { name: '历史', field: 'history_score' },
+                    { name: '政治', field: 'politics_scaled_score' },
+                    { name: '地理', field: 'geography_scaled_score' },
+                    { name: '主科', field: 'main_subjects_score' },
+                    { name: '三科', field: 'three_subjects_sum' },
+                    { name: '总分', field: 'total_score' }
+                ];
+
+                let html = '';
+                subjects.forEach(subject => {
+                    const values = data.map(row => {
+                        const val = parseFloat(row[subject.field]);
+                        return isNaN(val) ? null : val;
+                    }).filter(v => v !== null);
+
+                    if (values.length === 0) {
+                        html += `
+                            <tr>
+                                <td>${subject.name}</td>
+                                <td>—</td>
+                                <td>—</td>
+                                <td>—</td>
+                                <td>—</td>
+                            </tr>`;
+                    } else {
+                        const avg = values.reduce((a, b) => a + b, 0) / values.length;
+                        const max = Math.max(...values);
+                        const min = Math.min(...values);
+                        const variance = values.reduce((sum, v) => sum + Math.pow(v - avg, 2), 0) / values.length;
+                        const std = Math.sqrt(variance);
+
+                        html += `
+                            <tr>
+                                <td><strong>${subject.name}</strong></td>
+                                <td>${avg.toFixed(1)}</td>
+                                <td>${max}</td>
+                                <td>${min}</td>
+                                <td>${std.toFixed(1)}</td>
+                            </tr>`;
+                    }
+                });
+
+                statsTableBody.innerHTML = html;
             }
 
             // ============ 图表功能 ============
@@ -1333,6 +1395,43 @@
                             tooltip: { mode: 'index', intersect: false }
                         }
                     }
+                });
+
+                // 数据分析页图表
+                charts.allSubjects = new Chart(document.getElementById('allSubjectsChart'), {
+                    type: 'line',
+                    data: { labels: [], datasets: [] },
+                    options: {
+                        ...chartConfig,
+                        plugins: {
+                            ...chartConfig.plugins,
+                            tooltip: { mode: 'index', intersect: false }
+                        }
+                    }
+                });
+
+                charts.scoreDistribution = new Chart(document.getElementById('scoreDistributionChart'), {
+                    type: 'bar',
+                    data: { labels: [], datasets: [] },
+                    options: chartConfig
+                });
+
+                charts.rankCompare = new Chart(document.getElementById('rankCompareChart'), {
+                    type: 'line',
+                    data: { labels: [], datasets: [] },
+                    options: {
+                        ...chartConfig,
+                        plugins: {
+                            ...chartConfig.plugins,
+                            tooltip: { mode: 'index', intersect: false }
+                        }
+                    }
+                });
+
+                charts.mainVsSub = new Chart(document.getElementById('mainVsSubChart'), {
+                    type: 'bar',
+                    data: { labels: [], datasets: [] },
+                    options: chartConfig
                 });
             }
 
@@ -1432,6 +1531,54 @@
                     }
                 ];
                 charts.rank.update();
+
+                // 数据分析页 - 各科成绩趋势
+                charts.allSubjects.data.labels = labels;
+                charts.allSubjects.data.datasets = [
+                    { label: '语文', data: sortedData.map(item => item.chinese_score || null), borderColor: '#4f46e5', tension: 0.3, pointRadius: 4 },
+                    { label: '数学', data: sortedData.map(item => item.math_score || null), borderColor: '#f59e0b', tension: 0.3, pointRadius: 4 },
+                    { label: '英语', data: sortedData.map(item => item.english_score || null), borderColor: '#10b981', tension: 0.3, pointRadius: 4 },
+                    { label: '历史', data: sortedData.map(item => item.history_score || null), borderColor: '#ef4444', tension: 0.3, pointRadius: 4 },
+                    { label: '政治', data: sortedData.map(item => item.politics_scaled_score || null), borderColor: '#8b5cf6', tension: 0.3, pointRadius: 4 },
+                    { label: '地理', data: sortedData.map(item => item.geography_scaled_score || null), borderColor: '#ec4899', tension: 0.3, pointRadius: 4 }
+                ];
+                charts.allSubjects.update();
+
+                // 数据分析页 - 成绩分布
+                const scoreRanges = ['0-50', '51-60', '61-70', '71-80', '81-90', '91-100'];
+                const totalScores = data.map(item => parseFloat(item.total_score)).filter(v => !isNaN(v));
+                const distribution = scoreRanges.map(range => {
+                    const [min, max] = range.split('-').map(Number);
+                    return totalScores.filter(s => s >= min && s <= max).length;
+                });
+                charts.scoreDistribution.data.labels = scoreRanges;
+                charts.scoreDistribution.data.datasets = [{
+                    label: '人数',
+                    data: distribution,
+                    backgroundColor: 'rgba(79, 70, 229, 0.7)',
+                    borderRadius: 6
+                }];
+                charts.scoreDistribution.update();
+
+                // 数据分析页 - 排名变化对比
+                charts.rankCompare.data.labels = labels;
+                charts.rankCompare.data.datasets = [
+                    { label: '区排名', data: sortedData.map(item => item.rank_district || null), borderColor: '#4f46e5', tension: 0.3, pointRadius: 4 },
+                    { label: '校排名', data: sortedData.map(item => item.rank_school || null), borderColor: '#f59e0b', tension: 0.3, pointRadius: 4 },
+                    { label: '班排名', data: sortedData.map(item => item.rank_class || null), borderColor: '#10b981', tension: 0.3, pointRadius: 4 }
+                ];
+                charts.rankCompare.update();
+
+                // 数据分析页 - 主科与副科对比
+                const mainVsSubLabels = labels;
+                const mainScores = sortedData.map(item => parseFloat(item.main_subjects_score) || null);
+                const subScores = sortedData.map(item => parseFloat(item.three_subjects_sum) || null);
+                charts.mainVsSub.data.labels = mainVsSubLabels;
+                charts.mainVsSub.data.datasets = [
+                    { label: '主科', data: mainScores, backgroundColor: '#4f46e5', borderRadius: 6 },
+                    { label: '三科', data: subScores, backgroundColor: '#10b981', borderRadius: 6 }
+                ];
+                charts.mainVsSub.update();
             }
 
             // ============ 计算单条记录的总分 ============
