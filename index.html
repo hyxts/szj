@@ -145,13 +145,26 @@
             align-items: center;
             gap: 4px;
         }
+        .countdown-year {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1e40af;
+            min-width: 36px;
+            text-align: center;
+        }
         .countdown-days {
-            font-size: 15px;
+            font-size: 16px;
             font-weight: 600;
             color: var(--text-main);
+            min-width: 24px;
+            text-align: center;
         }
         .countdown-label {
-            font-size: 13px;
+            font-size: 12px;
+        }
+        .countdown-unit {
+            font-size: 12px;
+            color: var(--text-subtle);
         }
 
         /* ========== 按钮 ========== */
@@ -573,15 +586,23 @@
             .nav-actions {
                 gap: 8px;
             }
-            .countdown-year,
-            .countdown-label {
-                display: none;
-            }
             .countdown {
                 font-size: 12px;
+                gap: 3px;
+            }
+            .countdown-year {
+                font-size: 13px;
+                min-width: 32px;
             }
             .countdown-days {
                 font-size: 14px;
+                min-width: 20px;
+            }
+            .countdown-label {
+                font-size: 11px;
+            }
+            .countdown-unit {
+                font-size: 11px;
             }
             h1 {
                 font-size: 18px;
@@ -708,11 +729,10 @@
             </div>
             <div class="nav-actions">
                 <div class="countdown" id="gaokaoCountdown">
-                    <span>距离</span>
+                    <span class="countdown-label">距高考</span>
                     <span class="countdown-year" id="countdownYear">—</span>
-                    <span>年高考</span>
                     <span class="countdown-days" id="countdownDays">—</span>
-                    <span class="countdown-label">天</span>
+                    <span class="countdown-unit">天</span>
                 </div>
             </div>
             <button class="mobile-nav-toggle" id="mobileNavToggle" onclick="toggleMobileNav()">≡</button>
