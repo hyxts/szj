@@ -1236,6 +1236,7 @@
                     item.addEventListener('click', function() {
                         const pageId = this.getAttribute('data-page');
                         switchPage(pageId);
+                        closeMobileNav();
                     });
                 });
             }
@@ -1243,6 +1244,11 @@
             function toggleMobileNav() {
                 const navMenu = document.getElementById('navMenu');
                 navMenu.classList.toggle('mobile-active');
+            }
+
+            function closeMobileNav() {
+                const navMenu = document.getElementById('navMenu');
+                navMenu.classList.remove('mobile-active');
             }
 
             // ============ 总分计算 ============
