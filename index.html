@@ -542,6 +542,47 @@
             background: #dc2626;
         }
 
+        /* ========== 移动端底部标签栏 ========== */
+        .mobile-bottom-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #ffffff;
+            border-top: 1px solid #e2e8f0;
+            z-index: 1000;
+            padding: 0;
+        }
+
+        .mobile-nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            background: transparent;
+            color: #64748b;
+            font-size: 11px;
+        }
+
+        .mobile-nav-item.active {
+            color: #1e40af;
+            font-weight: 600;
+        }
+
+        .mobile-nav-item:active {
+            background: rgba(30, 64, 175, 0.05);
+        }
+
+        .main-content {
+            padding-bottom: 70px;
+        }
+
         /* ========== 响应式布局 ========== */
         @media (max-width: 1024px) {
             .chart-grid {
@@ -553,51 +594,20 @@
         }
 
         @media (max-width: 768px) {
-            .nav-menu {
-                display: none;
-                position: absolute;
-                top: 56px;
-                left: 0;
-                right: 0;
-                background: #eff6ff;
-                flex-direction: column;
-                padding: 10px 20px;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-                gap: 4px;
-                z-index: 800;
-            }
-            .nav-menu.mobile-active {
+            .mobile-bottom-nav {
                 display: flex;
             }
-            .nav-item {
-                padding: 12px 14px;
-                border-radius: var(--radius-sm);
-                margin: 2px 0;
+            .nav-container {
+                padding-right: 50px;
             }
-            .nav-item:hover,
-            .nav-item.active {
-                background: rgba(30, 64, 175, 0.08);
+            .nav-menu {
+                display: none !important;
             }
             .mobile-nav-toggle {
-                display: flex;
-                padding: 6px;
+                display: flex !important;
             }
-            .nav-actions {
-                gap: 8px;
-            }
-            .countdown {
-                padding: 3px 8px;
-                gap: 6px;
-                font-size: 11px;
-            }
-            .countdown-label {
-                font-size: 10px;
-            }
-            #countdownDays {
-                font-size: 15px;
-            }
-            .countdown-unit {
-                font-size: 10px;
+            .container.main-content {
+                padding-bottom: 80px;
             }
             h1 {
                 font-size: 18px;
@@ -735,8 +745,21 @@
         </div>
     </nav>
 
+    <!-- 移动端底部标签栏 -->
+    <nav class="mobile-bottom-nav" id="mobileBottomNav">
+        <div class="mobile-nav-item active" data-page="dashboard">
+            <span class="mobile-nav-label">概览</span>
+        </div>
+        <div class="mobile-nav-item" data-page="records">
+            <span class="mobile-nav-label">成绩记录</span>
+        </div>
+        <div class="mobile-nav-item" data-page="analysis">
+            <span class="mobile-nav-label">数据分析</span>
+        </div>
+    </nav>
+
     <!-- 主内容区 -->
-    <div class="container">
+    <div class="container main-content">
         <!-- 页面内容 -->
         <div class="page-container">
             <!-- 概览页 -->
@@ -1218,6 +1241,10 @@
                     item.classList.remove('active');
                 });
 
+                document.querySelectorAll('.mobile-nav-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+
                 const targetPage = document.getElementById('page-' + pageId);
                 if (targetPage) {
                     targetPage.style.display = 'block';
@@ -1228,6 +1255,11 @@
                     navItem.classList.add('active');
                 }
 
+                const mobileNavItem = document.querySelector('.mobile-nav-item[data-page="' + pageId + '"]');
+                if (mobileNavItem) {
+                    mobileNavItem.classList.add('active');
+                }
+
                 currentPage = pageId;
             }
 
@@ -1236,7 +1268,13 @@
                     item.addEventListener('click', function() {
                         const pageId = this.getAttribute('data-page');
                         switchPage(pageId);
-                        closeMobileNav();
+                    });
+                });
+
+                document.querySelectorAll('.mobile-nav-item').forEach(item => {
+                    item.addEventListener('click', function() {
+                        const pageId = this.getAttribute('data-page');
+                        switchPage(pageId);
                     });
                 });
             }
@@ -1244,11 +1282,6 @@
             function toggleMobileNav() {
                 const navMenu = document.getElementById('navMenu');
                 navMenu.classList.toggle('mobile-active');
-            }
-
-            function closeMobileNav() {
-                const navMenu = document.getElementById('navMenu');
-                navMenu.classList.remove('mobile-active');
             }
 
             // ============ 总分计算 ============
@@ -1705,6 +1738,10 @@
 
             // ============ 模态框操作 ============
             
+            window.refreshData = function() {
+                fetchData();
+            };
+
             window.openAddModal = function() {
                 isEditMode = false;
                 DOM.modalTitle.textContent = '添加成绩记录';
